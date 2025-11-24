@@ -5,6 +5,23 @@ h1 {
     margin-bottom: 0.5em;
 }
 
+/* Page background */
+body {
+    background-image: url('/static/images/background.svg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+/* Make content readable on top of the background */
+.container {
+    background: rgba(255,255,255,0.95);
+    padding: 1rem;
+    border-radius: 4px;
+}
+
 /* Header: keep nav on the right, center the site title */
 .site-header .container {
     display: flex;
