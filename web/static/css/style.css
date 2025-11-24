@@ -18,7 +18,7 @@ body {
 
 /* Make content readable on top of the background */
 .container {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.15);
     padding: 1rem;
     border-radius: 4px;
 }
