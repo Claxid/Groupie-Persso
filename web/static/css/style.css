@@ -25,19 +25,20 @@ body {
 .site-header .container {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
 }
 
 .site-header .container h1 {
-    flex: 1 1 auto;
-    text-align: center;
+    flex: 0 1 auto;
+    text-align: left;
     margin: 0;
 }
 
-/* Stronger rules to ensure centering across environments (fallbacks) */
+/* Ensure title stays left even if other styles try to override */
 .site-header > .container > h1,
 .site-header .container > h1 {
-    width: 100%;
-    text-align: center !important;
+    text-align: left !important;
 }
 
 /* keep nav at the right of the header */
