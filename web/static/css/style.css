@@ -16,3 +16,22 @@ h1 {
     text-align: center;
     margin: 0;
 }
+
+/* Stronger rules to ensure centering across environments (fallbacks) */
+.site-header > .container > h1,
+.site-header .container > h1 {
+    width: 100%;
+    text-align: center !important;
+}
+
+/* keep nav at the right of the header */
+.site-header .main-nav {
+    margin-left: auto;
+    display: flex;
+    gap: 1rem;
+}
+
+/* prevent nav wrapping which could push title down */
+.site-header .container {
+    flex-wrap: nowrap;
+}
