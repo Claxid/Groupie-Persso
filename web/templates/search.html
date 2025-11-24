@@ -1,0 +1,40 @@
+(<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Recherche — Groupie Tracker</title>
+		<meta name="description" content="Recherche de groupes et concerts." />
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="/static/css/style.css" />
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="container">
+				<h1>Groupie Tracker</h1>
+				<nav class="main-nav" id="mainNav">
+					<a href="/">Accueil</a>
+					<a href="/search">Recherche</a>
+					<a href="/filters">Filtres</a>
+					<a href="/geoloc">Géolocalisation</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="container">
+			<section>
+				<h2>Recherche</h2>
+				<p class="muted">Lancez une recherche par nom de groupe ou mot-clé.</p>
+				<form action="/search" method="get">
+					<input type="search" name="q" placeholder="Rechercher un groupe..." style="width:100%; padding:0.6rem; margin-top:0.6rem; border-radius:6px; border:1px solid rgba(0,0,0,0.08);">
+				</form>
+			</section>
+		</main>
+
+		<footer class="site-footer">
+			<div class="container">© Groupie Tracker — Projet fait par Preston, Clément et Timéo</div>
+		</footer>
+		<script src="/static/js/ui.js"></script>
+	</body>
+</html>)
+
