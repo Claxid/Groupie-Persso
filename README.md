@@ -1,1 +1,1 @@
-# Groupie-Persso
+// Placeholder for README.md
