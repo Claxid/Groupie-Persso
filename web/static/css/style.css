@@ -6,11 +6,12 @@ h1 {
 
 /* Page background */
 body {
-    background-image: url('/static/images/Fond_GroupieTracker.png');
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    /* Try absolute path first (served by Netlify), then repo-relative fallback */
+    background-image: url('/static/images/Fond_GroupieTracker.png'), url('web/static/images/Fond_GroupieTracker.png');
+    background-size: cover, cover;
+    background-position: center center, center center;
+    background-repeat: no-repeat, no-repeat;
+    background-attachment: fixed, fixed;
     min-height: 100vh;
 }
 
