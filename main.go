@@ -1,46 +1,29 @@
 package main
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 )
 
 func main() {
-	templates, err := template.ParseGlob(filepath.Join("web", "templates", "*.html"))
-	if err != nil {
-		log.Fatalf("parsing templates: %v", err)
-	}
-
-	// Static files (css, js, images)
-	fs := http.FileServer(http.Dir(filepath.Join("web", "static")))
+	// Serve static files from the repository-root `static/` folder
+	fs := http.FileServer(http.Dir(filepath.Join("static")))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	// Handlers for pages
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if err := templates.ExecuteTemplate(w, "home.html", nil); err != nil {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-		}
-	})
+	// Serve the root `index.html` (Netlify serves this file at the root)
+	serveIndex := func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("index.html"))
+	}
 
-	http.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
-		if err := templates.ExecuteTemplate(w, "search.html", nil); err != nil {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-		}
-	})
+	http.HandleFunc("/", serveIndex)
 
-	http.HandleFunc("/filters", func(w http.ResponseWriter, r *http.Request) {
-		if err := templates.ExecuteTemplate(w, "filters.html", nil); err != nil {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-		}
-	})
-
-	http.HandleFunc("/geoloc", func(w http.ResponseWriter, r *http.Request) {
-		if err := templates.ExecuteTemplate(w, "geoloc.html", nil); err != nil {
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-		}
-	})
+	// Ensure other app routes return the same index (so local behaviour matches Netlify)
+	routes := []string{"/search", "/filters", "/geoloc"}
+	for _, rt := range routes {
+		rlocal := rt
+		http.HandleFunc(rlocal, serveIndex)
+	}
 
 	addr := ":8080"
 	log.Printf("Starting server on %s — open http://localhost:8080/", addr)

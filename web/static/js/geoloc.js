@@ -1,1 +1,3 @@
-// Placeholder for geoloc.js
+
+// Placeholder: fichier JS vidé. Interactions servies depuis `index.html`.
+

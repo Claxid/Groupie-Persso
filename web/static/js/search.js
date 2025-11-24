@@ -1,1 +1,3 @@
-// Placeholder for search.js
+
+// Placeholder: fichier JS vidé. Interactions servies depuis `index.html`.
+
