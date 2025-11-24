@@ -1,6 +1,6 @@
 h1 {
     font-size: 2.5em;
-    color: #000000 !important;
+    color: #000000;
     margin-bottom: 0.5em;
 }
 
@@ -15,9 +15,8 @@ body {
     min-height: 100vh;
 }
 
-/* Remove white block so background is visible */
+/* Make content readable on top of the background */
 .container {
     background: transparent;
     padding: 1rem;
-    border-radius: 0;
 }
