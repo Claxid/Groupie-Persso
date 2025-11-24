@@ -7,14 +7,13 @@ h1 {
 
 /* Page background */
 body {
-    background-image: url('/static/images/Fond_GroupieTracker.png');
+    background-image: url('web/static/images/background.svg');
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     background-attachment: fixed;
     min-height: 100vh;
 }
-
 /* Make content readable on top of the background */
 .container {
     background: rgba(255,255,255,0.95);
