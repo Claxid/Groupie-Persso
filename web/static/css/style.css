@@ -4,3 +4,15 @@ h1 {
     text-align: center;
     margin-bottom: 0.5em;
 }
+
+/* Header: keep nav on the right, center the site title */
+.site-header .container {
+    display: flex;
+    align-items: center;
+}
+
+.site-header .container h1 {
+    flex: 1 1 auto;
+    text-align: center;
+    margin: 0;
+}
