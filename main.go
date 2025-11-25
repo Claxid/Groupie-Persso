@@ -10,15 +10,25 @@ import (
 )
 
 func main() {
-	// Serve static files. Prefer `web/static` (used by Netlify) when present,
-	// otherwise fall back to the repo-root `static/` folder.
-	staticDir := filepath.Join("static")
-	if _, err := os.Stat(filepath.Join("web", "static")); err == nil {
-		staticDir = filepath.Join("web", "static")
-	}
-	log.Printf("serving static files from: %s", staticDir)
-	fs := http.FileServer(http.Dir(staticDir))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	// Serve static files by checking multiple locations so the local server
+	// can merge assets from `static/` and `web/static/`.
+	// Preference order: `static/` then `web/static/`.
+	staticDirs := []string{filepath.Join("static"), filepath.Join("web", "static")}
+	log.Printf("static search paths: %v", staticDirs)
+
+	http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
+		// trim leading /static/
+		reqPath := r.URL.Path[len("/static/"):]
+		for _, base := range staticDirs {
+			full := filepath.Join(base, filepath.FromSlash(reqPath))
+			if fi, err := os.Stat(full); err == nil && !fi.IsDir() {
+				http.ServeFile(w, r, full)
+				return
+			}
+		}
+		// fallback: let the default file server return 404
+		http.NotFound(w, r)
+	})
 
 	// Serve the root `index.html` (Netlify serves this file at the root)
 	serveIndex := func(w http.ResponseWriter, r *http.Request) {
