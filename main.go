@@ -4,13 +4,20 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"time"
 )
 
 func main() {
-	// Serve static files from the repository-root `static/` folder
-	fs := http.FileServer(http.Dir(filepath.Join("static")))
+	// Serve static files. Prefer `web/static` (used by Netlify) when present,
+	// otherwise fall back to the repo-root `static/` folder.
+	staticDir := filepath.Join("static")
+	if _, err := os.Stat(filepath.Join("web", "static")); err == nil {
+		staticDir = filepath.Join("web", "static")
+	}
+	log.Printf("serving static files from: %s", staticDir)
+	fs := http.FileServer(http.Dir(staticDir))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	// Serve the root `index.html` (Netlify serves this file at the root)
