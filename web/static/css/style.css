@@ -47,6 +47,10 @@ body{
     color:#000000;
     font-size:1.8rem;
 }
+
+/* vinyl cover: clip and zoom so label images don't look rectangular */
+.vinyl-frame{overflow:hidden;position:relative}
+.vinyl-cover{border-radius:50%;object-fit:cover;transform:scale(1.18);transition:transform .25s ease}
 .main-nav{
     margin-left:auto;
     display:flex;
