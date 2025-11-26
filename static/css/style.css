@@ -4,7 +4,7 @@ h1 {
     margin-bottom: 0.5em;
 }
 
-/* Page background */
+
 body {
     /* Try absolute path first (served by Netlify), then repo-relative fallback */
     background-image: url('/static/images/Fond_GroupieTracker.png'), url('web/static/images/Fond_GroupieTracker.png');
