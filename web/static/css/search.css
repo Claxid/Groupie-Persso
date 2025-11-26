@@ -106,31 +106,3 @@ body{
 
 /* Utility */
 .muted{color:var(--muted)}
-
-/* Header search form centralized styles */
-.header-search-form{
-    display:flex;
-    gap:0.5rem;
-    align-items:center;
-    margin-left:1rem;
-}
-.header-search-input{
-    padding:0.4rem 0.6rem;
-    border-radius:6px;
-    border:1px solid #ddd;
-    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-}
-.header-search-btn{
-    padding:0.4rem 0.6rem;
-    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    border-radius:6px;
-    border:1px solid rgba(0,0,0,0.08);
-    background:var(--accent);
-    color:#fff;
-    cursor:pointer;
-}
-
-@media(max-width:600px){
-    .header-search-form{width:100%; gap:0.5rem}
-    .header-search-input{flex:1}
-}

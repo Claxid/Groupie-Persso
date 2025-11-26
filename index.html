@@ -13,9 +13,12 @@
         <header class="site-header">
             <div class="container">
                 <h1>Groupie Tracker</h1>
+                <form id="headerSearch" class="header-search-form" action="/search.html" method="get">
+                    <input type="search" name="q" placeholder="Rechercher un artiste..." aria-label="Recherche" class="header-search-input">
+                    <button type="submit" class="btn header-search-btn">Recherche</button>
+                </form>
                 <nav class="main-nav" id="mainNav">
                     <a href="/">Accueil</a>
-                    <a href="/search.html">Recherche</a>
                     <a href="/filters">Filtres</a>
                     <a href="/geoloc">Géolocalisation</a>
                 </nav>

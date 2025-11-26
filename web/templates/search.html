@@ -11,6 +11,9 @@
 	<div class="container">
 		<header class="site-header">
 			<h1>Recherche d'artistes</h1>
+			<!-- Bouton retour : utilise history.back() si JS activé, fallback vers / -->
+			<a href="/" class="btn back-btn" onclick="history.back(); return false;" style="margin-left:1rem;">Retour</a>
+			<noscript><a href="/" class="btn back-btn" style="margin-left:1rem;">Retour</a></noscript>
 		</header>
 
 		<main>
