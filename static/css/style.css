@@ -148,6 +148,16 @@ body, p, li, a{color:#111}
     pointer-events:auto;
 }
 
+/* ensure the cover image is clipped to the circular frame and slightly zoomed */
+.vinyl-frame{overflow:hidden;position:relative}
+
+.vinyl-cover{
+    border-radius:50%;
+    object-fit:cover;
+    transform:scale(1.18);
+    transition:transform .25s ease;
+}
+
 .vinyl-cover{
     width:34%; /* smaller cover to reveal more vinyl texture */
     height:34%;
