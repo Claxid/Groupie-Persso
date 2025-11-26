@@ -44,6 +44,11 @@ func main() {
 		http.HandleFunc(rlocal, serveIndex)
 	}
 
+	// Serve specific template HTML files from `web/templates/` when requested
+	http.HandleFunc("/search.html", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))
+	})
+
 	addr := ":8080"
 	log.Printf("Starting server on %s — open http://localhost:8080/", addr)
 	// start server

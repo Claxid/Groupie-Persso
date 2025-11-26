@@ -1,14 +1,35 @@
-
 <!DOCTYPE html>
 <html lang="fr">
-	<head>
-		<meta charset="utf-8" />
-		<meta http-equiv="refresh" content="0;url=/" />
-		<title>Placeholder</title>
-	</head>
-	<body>
-		<!-- Placeholder: contenu déplacé vers `index.html`. Ouvrez la racine / -->
-		<p><a href="/">Retour à l'accueil</a></p>
-	</body>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Recherche d'artistes</title>
+	<link rel="stylesheet" href="/static/css/search.css">
+	<meta name="robots" content="noindex">
+</head>
+<body>
+	<div class="container">
+		<header class="site-header">
+			<h1>Recherche d'artistes</h1>
+			<!-- Bouton retour : utilise history.back() si JS activé, fallback vers / -->
+			<a href="/" class="btn back-btn" onclick="history.back(); return false;" style="margin-left:1rem;">Retour</a>
+			<noscript><a href="/" class="btn back-btn" style="margin-left:1rem;">Retour</a></noscript>
+		</header>
+
+		<main>
+			<form id="searchForm">
+				<label for="query">Nom de l'artiste :</label>
+				<input type="text" id="query" name="q" placeholder="Entrez un nom d'artiste" required aria-label="Nom de l'artiste">
+				<button type="submit">Rechercher</button>
+			</form>
+
+			<section id="results" aria-live="polite">
+				<p>Entrez un nom et cliquez sur « Rechercher » pour voir les résultats.</p>
+			</section>
+		</main>
+	</div>
+
+	<script src="/static/js/search.js"></script>
+</body>
 </html>
 
