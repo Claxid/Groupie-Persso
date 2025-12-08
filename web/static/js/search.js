@@ -55,11 +55,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	function renderArtist(artist) {
 		const name = escapeHtml(artist.name || '—');
-		// remote API might have 'location' or 'city' fields; attempt common keys
-		const city = (artist.city || artist.location || artist.place) ? `<p>Ville: ${escapeHtml(artist.city || artist.location || artist.place)}</p>` : '';
-		const genre = artist.genre ? `<p>Genre: ${escapeHtml(artist.genre)}</p>` : '';
-		const link = artist.url || artist.website || artist.link ? `<p><a href="${escapeAttr(artist.url || artist.website || artist.link)}" target="_blank" rel="noopener noreferrer">Profil / site</a></p>` : '';
-		return `\n<article class="artist">\n  <h2>${name}</h2>\n  ${city}\n  ${genre}\n  ${link}\n</article>`;
+		// image detection: try several common keys
+		const imageUrl = artist.image || artist.imageUrl || artist.picture || artist.photo || artist.thumbnail || artist.img || artist.thumb || artist.image_url || artist.photo_url || artist.avatar;
+		const cityVal = artist.city || artist.location || artist.place;
+		const city = cityVal ? `<p class="artist-meta">${escapeHtml(cityVal)}</p>` : '';
+		const genre = artist.genre ? `<p class="artist-meta">${escapeHtml(artist.genre)}</p>` : '';
+		const linkUrl = artist.url || artist.website || artist.link;
+		const link = linkUrl ? `<p class="artist-link"><a href="${escapeAttr(linkUrl)}" target="_blank" rel="noopener noreferrer">Profil / site</a></p>` : '';
+
+		const media = imageUrl ? `<div class="artist-media"><img src="${escapeAttr(imageUrl)}" alt="Photo de ${name}" loading="lazy"></div>` : '';
+
+		return `\n<article class="artist-card">\n  ${media}\n  <div class="artist-body">\n    <h2>${name}</h2>\n    ${city}\n    ${genre}\n    ${link}\n  </div>\n</article>`;
 	}
 
 	function escapeHtml(str) {
