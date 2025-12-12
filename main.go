@@ -10,21 +10,17 @@ import (
 )
 
 func main() {
-	// Serve static files by checking multiple locations so the local server
-	// can merge assets from `static/` and `web/static/`.
-	// Preference order: `static/` then `web/static/`.
-	staticDirs := []string{filepath.Join("static"), filepath.Join("web", "static")}
-	log.Printf("static search paths: %v", staticDirs)
+	// Serve static files from a single root: web/static
+	staticDir := filepath.Join("web", "static")
+	log.Printf("static root: %s", staticDir)
 
 	http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		// trim leading /static/
 		reqPath := r.URL.Path[len("/static/"):]
-		for _, base := range staticDirs {
-			full := filepath.Join(base, filepath.FromSlash(reqPath))
-			if fi, err := os.Stat(full); err == nil && !fi.IsDir() {
-				http.ServeFile(w, r, full)
-				return
-			}
+		full := filepath.Join(staticDir, filepath.FromSlash(reqPath))
+		if fi, err := os.Stat(full); err == nil && !fi.IsDir() {
+			http.ServeFile(w, r, full)
+			return
 		}
 		// fallback: let the default file server return 404
 		http.NotFound(w, r)
