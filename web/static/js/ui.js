@@ -87,9 +87,10 @@ document.addEventListener('DOMContentLoaded', function () {
 		vinylGrid.innerHTML = '';
 
 		// create one vinyl-item per artist
-		artists.forEach((a) => {
+		artists.forEach((a, idx) => {
 			const item = document.createElement('div');
-			item.className = 'vinyl-item';
+			item.className = 'vinyl-item fade-in';
+			item.style.animationDelay = `${idx * 60}ms`;
 
 			const frame = document.createElement('div');
 			frame.className = 'vinyl-frame';

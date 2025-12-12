@@ -4,30 +4,49 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Recherche d'artistes</title>
+	<link rel="stylesheet" href="/static/css/style.css">
 	<link rel="stylesheet" href="/static/css/search.css">
 	<meta name="robots" content="noindex">
 </head>
 <body>
-	<div class="container">
-		<header class="site-header">
+	<header class="site-header">
+		<div class="container">
 			<h1>Recherche d'artistes</h1>
-			<!-- Bouton retour : utilise history.back() si JS activé, fallback vers / -->
-			<a href="/" class="back-btn" onclick="history.back(); return false;" style="margin-left:1rem;">Retour</a>
-			<noscript><a href="/" class="back-btn" style="margin-left:1rem;">Retour</a></noscript>
-		</header>
+			<nav class="main-nav" aria-label="Navigation principale">
+				<a href="/">Accueil</a>
+				<a href="/filters">Filtres</a>
+				<a href="/geoloc">Géolocalisation</a>
+			</nav>
+			<div class="header-actions">
+				<a href="/" class="back-btn" onclick="history.back(); return false;">Retour</a>
+				<noscript><a href="/" class="back-btn">Retour</a></noscript>
+			</div>
+		</div>
+	</header>
 
-		<main>
-			<form id="searchForm">
-				<label for="query">Nom de l'artiste :</label>
-				<input type="text" id="query" name="q" placeholder="Entrez un nom d'artiste" required aria-label="Nom de l'artiste">
-				<button type="submit">Rechercher</button>
-			</form>
+	<main class="container">
+		<form id="searchForm" class="search-form">
+			<label for="query">Nom de l'artiste :</label>
+			<div class="input-stack">
+				<input type="text" id="query" name="q" placeholder="Entrez un nom d'artiste" required aria-label="Nom de l'artiste" autocomplete="off">
+				<div id="suggestions" class="suggestions" role="listbox" aria-label="Suggestions"></div>
+			</div>
+			<div class="quick-filters" id="quickFilters" aria-label="Filtres rapides">
+				<button type="button" class="chip" data-filter="rock">Rock</button>
+				<button type="button" class="chip" data-filter="seventies">Années 70</button>
+				<button type="button" class="chip" data-filter="usa">USA</button>
+				<button type="button" class="chip" data-filter="month">Concerts ce mois-ci</button>
+			</div>
+			<div class="actions">
+				<button type="submit" class="btn-primary">Rechercher</button>
+				<button type="button" id="clearSearch" class="btn-ghost">Effacer</button>
+			</div>
+		</form>
 
-			<section id="results" aria-live="polite">
-				<p>Entrez un nom et cliquez sur « Rechercher » pour voir les résultats.</p>
-			</section>
-		</main>
-	</div>
+		<section id="results" class="results" aria-live="polite">
+			<p>Entrez un nom ou utilisez un filtre pour voir les résultats.</p>
+		</section>
+	</main>
 
 	<script src="/static/js/search.js"></script>
 </body>
