@@ -177,7 +177,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		addLink(artist.locations, 'Locations');
 		addLink(artist.concertDates, 'Concert dates');
 		addLink(artist.relations, 'Relations');
-		addLink(apiUrl, 'Voir JSON API');
 		return p;
 	}
 

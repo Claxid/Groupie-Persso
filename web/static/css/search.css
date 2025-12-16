@@ -173,6 +173,34 @@ body{
     color:var(--muted);
     font-size:0.9rem;
 }
+/* Modal: links under 'Premier album' */
+.artist-links{
+    margin-top:8px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-left: 20px;
+}
+.artist-links a{
+    color:#fff;
+    font-weight:600;
+    text-decoration:none;
+    background:var(--accent);
+    padding:0.45rem 0.7rem;
+    border-radius:10px;
+    display:inline-block;
+    border:1px solid var(--glass-border);
+    box-shadow:0 12px 28px rgba(0,0,0,0.35);
+    transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+}
+.artist-links a:hover{
+    transform:translateY(-1px);
+    box-shadow:0 16px 36px rgba(0,0,0,0.45);
+}
+.artist-links a:focus{
+    outline:2px solid rgba(123,58,237,0.35);
+    outline-offset:2px;
+}
 .artist-link a{
     color:#fff;
     font-weight:600;
