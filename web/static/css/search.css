@@ -1,11 +1,4 @@
 :root{
-<<<<<<< HEAD
-    --accent: #d83434;
-    --bg-overlay: rgba(255,255,255,0.65);
-    --muted: #555;
-    --radius: 10px;
-    --max-width: 1400px;
-=======
     --charcoal: #0d0f14;
     --panel: rgba(20,22,30,0.6);
     --panel-strong: rgba(20,22,30,0.78);
@@ -18,19 +11,11 @@
     --glass-border: rgba(255,255,255,0.08);
     --radius: 14px;
     --shadow-strong: 0 18px 60px rgba(0,0,0,0.45);
->>>>>>> Timeo
 }
 
 /* Base */
 *{box-sizing:border-box}
-<<<<<<< HEAD
-html,body{
-    height:100%;
-    margin:0;
-}
-=======
 html,body{height:100%}
->>>>>>> Timeo
 body{
     font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     line-height:1.5;
@@ -51,48 +36,6 @@ body{
     max-width:var(--max-width);
     margin:1.25rem auto;
     padding:1.25rem 1.5rem;
-<<<<<<< HEAD
-    background:var(--bg-overlay);
-    border-radius:var(--radius);
-    box-shadow:0 10px 30px rgba(0,0,0,0.25);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
-
-/* Header */
-.site-header{
-    display:flex;
-    align-items:center;
-    gap:1rem;
-    margin-bottom:1rem;
-}
-.site-header .container{
-    display:flex;
-    align-items:center;
-    gap:1rem;
-    padding:0.75rem 1.5rem;
-}
-.site-header h1{
-    margin:0;
-    font-family: 'Merriweather', serif;
-    color:#000000;
-    font-size:1.8rem;
-}
-.main-nav{
-    margin-left:auto;
-    display:flex;
-    gap:0.75rem;
-}
-.main-nav a{
-    color:var(--muted);
-    text-decoration:none;
-    padding:0.45rem 0.6rem;
-    border-radius:8px;
-    transition:all 0.18s ease;
-    font-weight:600;
-}
-.main-nav a:hover{background:rgba(0,0,0,0.06); color:#000}
-=======
     background:var(--panel);
     border-radius:var(--radius);
     box-shadow:var(--shadow-strong);
@@ -105,7 +48,6 @@ body{
 .header-actions{display:flex;gap:0.6rem;align-items:center;margin-left:auto}
 .back-btn{display:inline-block;background:rgba(255,255,255,0.06);color:#f8fafc;padding:0.5rem 0.75rem;text-decoration:none;border:1px solid var(--glass-border);border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.25);transition:transform 0.18s ease, box-shadow 0.18s ease}
 .back-btn:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(0,0,0,0.35)}
->>>>>>> Timeo
 
 /* Form */
 .search-form{display:flex;flex-direction:column;gap:0.9rem}
@@ -120,21 +62,7 @@ body{
     color:#f8fafc;
     font-size:1rem;
 }
-<<<<<<< HEAD
-.hero p{color:var(--muted)}
-.cta .btn{
-    display:inline-block;
-    background:rgba(0,0,0,0.12);
-    color:#111;
-    padding:0.6rem 1rem;
-    border-radius:8px;
-    text-decoration:none;
-    border:1px solid rgba(0,0,0,0.06);
-}
-.cta .btn:hover{background:rgba(0,0,0,0.18)}
-=======
 .search-form input[type="text"]:focus{outline:2px solid rgba(123,58,237,0.35)}
->>>>>>> Timeo
 
 .suggestions{
     position:absolute;
@@ -159,16 +87,10 @@ body{
     border:0;
     text-align:left;
     cursor:pointer;
-    transition:background 0.15s ease;
+    transition: background 0.15s ease;
 }
 .suggestions button:hover{background:rgba(255,255,255,0.06)}
 
-<<<<<<< HEAD
-@media(max-width:599px){
-    .site-header .container{flex-wrap:wrap}
-    .main-nav{width:100%; justify-content:flex-start; gap:0.5rem;}
-    .container{margin:0.5rem; padding:1rem}
-=======
 .quick-filters{display:flex;flex-wrap:wrap;gap:0.5rem}
 .chip{
     padding:0.45rem 0.75rem;
@@ -177,43 +99,12 @@ body{
     background:rgba(255,255,255,0.06);
     color:#f8fafc;
     cursor:pointer;
-    transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.3s ease;
+    transition:transform 0.18s ease, box-shadow 0.18s ease, background 0.3s ease;
     box-shadow:0 10px 25px rgba(0,0,0,0.25);
->>>>>>> Timeo
 }
 .chip:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(0,0,0,0.35)}
 .chip.active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 14px 40px rgba(123,58,237,0.45)}
 
-<<<<<<< HEAD
-/* Utility */
-.muted{color:var(--muted)}
-
-/* Header search form centralized styles */
-.header-search-form{
-    display:flex;
-    gap:0.5rem;
-    align-items:center;
-    margin-left:1rem;
-}
-.header-search-input{
-    padding:0.4rem 0.6rem;
-    border-radius:8px;
-    border:1px solid #ddd;
-    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-}
-.header-search-btn{
-    padding:0.4rem 0.6rem;
-    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    border-radius:8px;
-    border:1px solid rgba(0,0,0,0.08);
-    background:#3d3d3d;
-    color:#fff;
-    cursor:pointer;
-    transition:all 0.18s ease;
-}
-.header-search-btn:hover{
-    background:#2f2f2f;
-=======
 .actions{display:flex;gap:0.75rem;flex-wrap:wrap}
 .btn-primary{
     padding:0.65rem 1.1rem;
@@ -224,106 +115,9 @@ body{
     cursor:pointer;
     box-shadow:0 14px 40px rgba(0,0,0,0.35);
     transition:transform 0.18s ease, box-shadow 0.18s ease;
->>>>>>> Timeo
 }
 .btn-primary:hover{transform:translateY(-1px) scale(1.01);box-shadow:0 18px 46px rgba(0,0,0,0.45)}
 
-<<<<<<< HEAD
-@media(max-width:600px){
-    .header-search-form{width:100%; gap:0.5rem}
-    .header-search-input{flex:1}
-}
-
-.back-btn{
-    display:inline-block;
-    background:rgba(0, 0, 0, 0.12);
-    color: #111;
-    padding: 0.6rem 1rem;
-    text-decoration: none;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    border-radius: 8px;
-    transition: all 0.18s ease;
-}
-.back-btn:hover{
-    background:rgba(0, 0, 0, 0.18);
-}
-.back-btn:focus{
-    outline:2px solid rgba(216,52,52,0.25);
-    outline-offset:2px;
-}
-
-/* Search form styling */
-#searchForm{
-    display:flex;
-    flex-direction:column;
-    gap:1rem;
-    margin-bottom:2rem;
-    padding:0.9rem;
-    background:rgba(255,255,255,0.85);
-    border-radius:8px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.08);
-}
-#searchForm label{
-    font-weight:600;
-    color:#222;
-    font-size:1.05rem;
-}
-#searchForm input[type="text"]{
-    padding:0.75rem 1rem;
-    border:2px solid #ddd;
-    border-radius:8px;
-    font-size:1rem;
-    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    transition: all 0.2s ease;
-    background:#fff;
-}
-#searchForm input[type="text"]:focus{
-    outline:none;
-    border-color:var(--accent);
-    box-shadow:0 0 0 3px rgba(216, 52, 52, 0.1);
-}
-#searchForm input[type="text"]::placeholder{
-    color:#999;
-}
-#searchForm button[type="submit"]{
-    padding:0.75rem 1.5rem;
-    background:#3d3d3d;
-    color:#fff;
-    border:none;
-    border-radius:8px;
-    font-size:1rem;
-    font-weight:600;
-    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    cursor:pointer;
-    transition: all 0.18s ease;
-    align-self:flex-start;
-}
-#searchForm button[type="submit"]:hover{
-    background:#2f2f2f;
-}
-#searchForm button[type="submit"]:focus{
-    outline:2px solid rgba(216,52,52,0.25);
-    outline-offset:2px;
-}
-
-@media(min-width:600px){
-    #searchForm{
-        flex-direction:row;
-        align-items:flex-end;
-        gap:1rem;
-    }
-    #searchForm label{
-        flex:0 0 auto;
-        margin-bottom:0.25rem;
-    }
-    #searchForm input[type="text"]{
-        flex:1;
-    }
-    #searchForm button[type="submit"]{
-        flex:0 0 auto;
-    }
-=======
 .btn-ghost{
     padding:0.65rem 1.1rem;
     border-radius:12px;
@@ -332,7 +126,6 @@ body{
     color:#f8fafc;
     cursor:pointer;
     transition:transform 0.18s ease, box-shadow 0.18s ease;
->>>>>>> Timeo
 }
 .btn-ghost:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(0,0,0,0.35)}
 
