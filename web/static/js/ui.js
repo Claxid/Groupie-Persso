@@ -57,8 +57,18 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
 	const LOCAL_API = '/api/artists-proxy';
 	const REMOTE_API = 'https://groupietrackers.herokuapp.com/api/artists';
+	const LOCAL_LOCATIONS_API = '/api/locations-proxy';
+	const REMOTE_LOCATIONS_API = 'https://groupietrackers.herokuapp.com/api/locations';
+	const LOCAL_DATES_API = '/api/dates-proxy';
+	const REMOTE_DATES_API = 'https://groupietrackers.herokuapp.com/api/dates';
+	const LOCAL_RELATIONS_API = '/api/relations-proxy';
+	const REMOTE_RELATIONS_API = 'https://groupietrackers.herokuapp.com/api/relation';
 	const vinylGrid = document.querySelector('.vinyl-area .vinyl-grid');
 	if (!vinylGrid) return;
+
+	let locationsData = null;
+	let datesData = null;
+	let relationsData = null;
 
 	async function tryFetch(url) {
 		const res = await fetch(url, {cache: 'no-store'});
@@ -66,7 +76,65 @@ document.addEventListener('DOMContentLoaded', function () {
 		return res.json();
 	}
 
+	async function loadLocations() {
+		try {
+			locationsData = await tryFetch(LOCAL_LOCATIONS_API);
+		} catch (err) {
+			// fallback to remote API if local proxy fails
+			try {
+				locationsData = await tryFetch(REMOTE_LOCATIONS_API);
+			} catch (err2) {
+				console.warn('Failed to load locations from both proxy and remote API', err, err2);
+			}
+		}
+	}
+
+	async function loadDates() {
+		try {
+			datesData = await tryFetch(LOCAL_DATES_API);
+		} catch (err) {
+			try {
+				datesData = await tryFetch(REMOTE_DATES_API);
+			} catch (err2) {
+				console.warn('Failed to load dates from both proxy and remote API', err, err2);
+			}
+		}
+	}
+
+	async function loadRelations() {
+		try {
+			relationsData = await tryFetch(LOCAL_RELATIONS_API);
+		} catch (err) {
+			try {
+				relationsData = await tryFetch(REMOTE_RELATIONS_API);
+			} catch (err2) {
+				console.warn('Failed to load relations from both proxy and remote API', err, err2);
+			}
+		}
+	}
+
+	function getLocationsForArtist(artistId) {
+		if (!locationsData || !locationsData.index) return null;
+		const artistLoc = locationsData.index.find(l => l.id === artistId);
+		return artistLoc ? artistLoc.locations : null;
+	}
+
+	function getDatesForArtist(artistId) {
+		if (!datesData || !datesData.index) return null;
+		const artistDates = datesData.index.find(d => d.id === artistId);
+		return artistDates ? artistDates.dates : null;
+	}
+
+	function getRelationsForArtist(artistId) {
+		if (!relationsData || !relationsData.index) return null;
+		const artistRel = relationsData.index.find(r => r.id === artistId);
+		return artistRel ? artistRel.datesLocations : null;
+	}
+
 	async function loadArtists() {
+		// Load supporting data first
+		await Promise.all([loadLocations(), loadDates(), loadRelations()]);
+
 		let data;
 		try {
 			data = await tryFetch(LOCAL_API);
@@ -109,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			caption.textContent = a.name || '';
 			item.appendChild(caption);
 
-			// clicking opens an improved in-page modal with artist details
+			// clicking the vinyl opens the artist modal
 			frame.style.cursor = 'pointer';
 			frame.addEventListener('click', function () {
 				openArtistModal(a);
@@ -118,7 +186,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			vinylGrid.appendChild(item);
 		});
 	}
-
 	// create modal container once
 	let modalEl = null;
 
@@ -180,6 +247,20 @@ document.addEventListener('DOMContentLoaded', function () {
 		return p;
 	}
 
+	function formatLocationName(loc) {
+		if (!loc) return '';
+		var formatted = loc.replace(/_/g, ' ').replace(/-/g, ', ');
+		return formatted.split(' ').map(function (w) {
+			return w ? w.charAt(0).toUpperCase() + w.slice(1) : '';
+		}).join(' ');
+	}
+
+	function formatDateLabel(dateStr) {
+		if (!dateStr) return '';
+		var clean = dateStr.replace(/^\*/, '');
+		return clean.replace(/-/g, '/');
+	}
+
 	function openArtistModal(artist) {
 		if (!modalEl) createModal();
 		var panel = modalEl.querySelector('.artist-modal__content');
@@ -204,6 +285,47 @@ document.addEventListener('DOMContentLoaded', function () {
 		body.appendChild(createEl('h3', '', 'Membres'));
 		body.appendChild(buildMembersList(membersArr));
 		body.appendChild(createEl('p', '', 'Premier album: ' + (artist.firstAlbum || '—')));
+
+		// Add locations section
+		var locations = getLocationsForArtist(artist.id);
+		if (locations && locations.length > 0) {
+			body.appendChild(createEl('h3', '', 'Lieux de concerts'));
+			var locList = createEl('ul', 'artist-locations');
+			locations.forEach(function (loc) {
+				locList.appendChild(createEl('li', '', formatLocationName(loc)));
+			});
+			body.appendChild(locList);
+		}
+
+		// Add dates section
+		var artistDates = getDatesForArtist(artist.id);
+		if (artistDates && artistDates.length > 0) {
+			body.appendChild(createEl('h3', '', 'Dates'));
+			var dateList = createEl('ul', 'artist-dates');
+			artistDates.forEach(function (d) {
+				dateList.appendChild(createEl('li', '', formatDateLabel(d)));
+			});
+			body.appendChild(dateList);
+		}
+
+		// Add relations section (dates by location)
+		var rel = getRelationsForArtist(artist.id);
+		if (rel && Object.keys(rel).length > 0) {
+			body.appendChild(createEl('h3', '', 'Dates par lieu'));
+			var relList = createEl('div', 'artist-relations');
+			Object.keys(rel).forEach(function (locKey) {
+				var group = createEl('div', 'artist-relations__group');
+				group.appendChild(createEl('div', 'artist-relations__loc', formatLocationName(locKey)));
+				var datesArr = rel[locKey] || [];
+				var ul = createEl('ul', 'artist-relations__dates');
+				datesArr.forEach(function (d) {
+					ul.appendChild(createEl('li', '', formatDateLabel(d)));
+				});
+				group.appendChild(ul);
+				relList.appendChild(group);
+			});
+			body.appendChild(relList);
+		}
 
 		var apiUrl = 'https://groupietrackers.herokuapp.com/api/artists/' + encodeURIComponent(artist.id || artist.name || '');
 		body.appendChild(buildLinks(artist, apiUrl));

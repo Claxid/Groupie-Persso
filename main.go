@@ -80,4 +80,71 @@ func init() {
 		w.WriteHeader(resp.StatusCode)
 		io.Copy(w, resp.Body)
 	})
+
+	http.HandleFunc("/api/locations-proxy", func(w http.ResponseWriter, r *http.Request) {
+		// remote API for locations
+		remote := "https://groupietrackers.herokuapp.com/api/locations"
+		client := &http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Get(remote)
+		if err != nil {
+			http.Error(w, "failed to fetch locations API", http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+
+		// copy selected headers (content-type)
+		if ct := resp.Header.Get("Content-Type"); ct != "" {
+			w.Header().Set("Content-Type", ct)
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+		}
+		// allow same-origin fetches from the browser
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		// relay status code and body
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+	})
+
+	http.HandleFunc("/api/dates-proxy", func(w http.ResponseWriter, r *http.Request) {
+		// remote API for dates
+		remote := "https://groupietrackers.herokuapp.com/api/dates"
+		client := &http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Get(remote)
+		if err != nil {
+			http.Error(w, "failed to fetch dates API", http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+
+		if ct := resp.Header.Get("Content-Type"); ct != "" {
+			w.Header().Set("Content-Type", ct)
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+		}
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+	})
+
+	http.HandleFunc("/api/relations-proxy", func(w http.ResponseWriter, r *http.Request) {
+		// remote API for relations
+		remote := "https://groupietrackers.herokuapp.com/api/relation"
+		client := &http.Client{Timeout: 10 * time.Second}
+		resp, err := client.Get(remote)
+		if err != nil {
+			http.Error(w, "failed to fetch relations API", http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+
+		if ct := resp.Header.Get("Content-Type"); ct != "" {
+			w.Header().Set("Content-Type", ct)
+		} else {
+			w.Header().Set("Content-Type", "application/json")
+		}
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+	})
 }

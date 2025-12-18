@@ -16,7 +16,7 @@ h1 {
     --accent-solid: #8b5cf6;
     --glass-border: rgba(255,255,255,0.08);
     --radius: 14px;
-    --max-width: 1400px;
+    --max-width: 1800px;
     --shadow-strong: 0 20px 70px rgba(0,0,0,0.4);
 }
 
@@ -158,8 +158,8 @@ body, p, li, a{color:var(--muted-strong)}
 .vinyl-frame:hover{transform:scale(1.08) rotate(-1deg);box-shadow:0 25px 60px rgba(123,58,237,0.45);filter:drop-shadow(0 12px 28px rgba(0,0,0,0.35))}
 
 .vinyl-cover{
-    width:34%;
-    height:34%;
+    width:40%;
+    height:40%;
     border-radius:50%;
     object-fit:cover;
     display:block;
@@ -173,11 +173,11 @@ body, p, li, a{color:var(--muted-strong)}
 .vinyl-caption{font-size:1.05rem;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:0.2px}
 
 /* Responsive: scale down vinyls on small screens */
-@media(max-width:1400px){.vinyl-frame{width:450px;height:450px}.vinyl-cover{width:36%;height:36%}}
+@media(max-width:1400px){.vinyl-frame{width:450px;height:450px}.vinyl-cover{width:42%;height:42%}}
 @media(max-width:1200px){.vinyl-grid{grid-template-columns: repeat(3, auto)}}
-@media(max-width:1024px){.vinyl-frame{width:360px;height:360px}.vinyl-cover{width:40%;height:40%}}
-@media(max-width:900px){.vinyl-frame{width:280px;height:280px}.vinyl-cover{width:44%;height:44%}.vinyl-grid{grid-template-columns: repeat(2, auto)}.vinyl-grid .vinyl-item:last-child{grid-column: 1 / -1; justify-self:center}}
-@media(max-width:500px){.vinyl-frame{width:160px;height:160px}.vinyl-cover{width:62%;height:62%}}
+@media(max-width:1024px){.vinyl-frame{width:360px;height:360px}.vinyl-cover{width:46%;height:46%}}
+@media(max-width:900px){.vinyl-frame{width:280px;height:280px}.vinyl-cover{width:50%;height:50%}.vinyl-grid{grid-template-columns: repeat(2, auto)}.vinyl-grid .vinyl-item:last-child{grid-column: 1 / -1; justify-self:center}}
+@media(max-width:500px){.vinyl-frame{width:160px;height:160px}.vinyl-cover{width:68%;height:68%}}
 
 /* Modal for artist details */
 .artist-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;visibility:hidden;opacity:0;transition:opacity .18s ease}
@@ -192,6 +192,15 @@ body, p, li, a{color:var(--muted-strong)}
 .artist-modal__body h3{margin:6px 0}
 .artist-members{margin:0 0 10px 18px}
 .artist-members li{margin-bottom:4px}
+.artist-locations{margin:0 0 10px 18px;color:var(--muted)}
+.artist-locations li{margin-bottom:4px}
+.artist-dates{margin:0 0 10px 18px;color:var(--muted)}
+.artist-dates li{margin-bottom:4px}
+.artist-relations{margin:0 0 12px 8px;display:flex;flex-direction:column;gap:8px;color:var(--muted)}
+.artist-relations__group{padding:6px 10px;border:1px solid var(--glass-border);border-radius:10px;background:rgba(255,255,255,0.03)}
+.artist-relations__loc{font-weight:600;color:#f8fafc;margin-bottom:4px}
+.artist-relations__dates{margin:0 0 6px 14px;padding:0;list-style:disc;color:var(--muted)}
+.artist-relations__dates li{margin-bottom:3px}
 /* Modal links under 'Premier album' */
 .artist-links{margin-top:12px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
 .artist-links a{display:inline-block;color:#fff;text-decoration:none;padding:0.65rem 1.2rem;font-size:1rem;font-weight:600;border-radius:10px;background:var(--accent);border:1px solid var(--glass-border);box-shadow:0 12px 28px rgba(0,0,0,0.35);transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease}
@@ -248,8 +257,8 @@ body, p, li, a{color:var(--muted-strong)}
 }
 
 .vinyl-cover{
-    width:34%; /* smaller cover to reveal more vinyl texture */
-    height:34%;
+    width:40%; /* smaller cover to reveal more vinyl texture */
+    height:40%;
     border-radius:50%;
     object-fit:cover;
     display:block;
@@ -266,19 +275,19 @@ body, p, li, a{color:var(--muted-strong)}
 /* Responsive: scale down vinyls on small screens */
 @media(max-width:1400px){
     .vinyl-frame{width:450px;height:450px}
-    .vinyl-cover{width:36%;height:36%}
+    .vinyl-cover{width:42%;height:42%}
 }
 
 @media(max-width:1024px){
     /* tablets */
     .vinyl-frame{width:360px;height:360px}
-    .vinyl-cover{width:40%;height:40%}
+    .vinyl-cover{width:46%;height:46%}
 }
 
 @media(max-width:900px){
     /* small laptops / large phones */
     .vinyl-frame{width:280px;height:280px}
-    .vinyl-cover{width:44%;height:44%}
+    .vinyl-cover{width:50%;height:50%}
     /* on narrower viewports switch to 2 columns and center last item */
     .vinyl-grid{grid-template-columns: repeat(2, auto)}
     .vinyl-grid .vinyl-item:last-child{grid-column: 1 / -1; justify-self:center}
@@ -287,7 +296,7 @@ body, p, li, a{color:var(--muted-strong)}
 @media(max-width:500px){
     /* phones */
     .vinyl-frame{width:160px;height:160px}
-    .vinyl-cover{width:62%;height:62%}
+    .vinyl-cover{width:68%;height:68%}
 }
 
 /* Modal for artist details */
