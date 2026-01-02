@@ -207,6 +207,8 @@ document.addEventListener('DOMContentLoaded', function () {
 		var closeBtn = createEl('button', 'artist-modal__close', '×');
 		closeBtn.setAttribute('aria-label', 'Fermer');
 		closeBtn.addEventListener('click', hideModal);
+		// Store reference to close button for showing/hiding
+		modalEl.closeBtn = closeBtn;
 
 		var content = createEl('div', 'artist-modal__content');
 
@@ -230,21 +232,55 @@ document.addEventListener('DOMContentLoaded', function () {
 		return ul;
 	}
 
-	function buildLinks(artist, apiUrl) {
-		var p = createEl('p', 'artist-links');
-		function addLink(href, label) {
-			if (!href) return;
-			var a = createEl('a');
-			a.href = href;
-			a.target = '_blank';
-			a.rel = 'noopener';
-			a.textContent = label;
-			p.appendChild(a);
+	function buildSection(title, contentEl) {
+		var section = createEl('section', 'artist-section');
+		section.appendChild(createEl('h3', '', title));
+		if (contentEl) section.appendChild(contentEl);
+		return section;
+	}
+
+	function buildLocationsSection(artist) {
+		var locations = getLocationsForArtist(artist.id);
+		if (!locations || !locations.length) {
+			return buildSection('Lieux de concerts', createEl('p', 'muted', 'Aucun lieu disponible pour cet artiste.'));
 		}
-		addLink(artist.locations, 'Locations');
-		addLink(artist.concertDates, 'Concert dates');
-		addLink(artist.relations, 'Relations');
-		return p;
+		var locList = createEl('ul', 'artist-locations');
+		locations.forEach(function (loc) {
+			locList.appendChild(createEl('li', '', formatLocationName(loc)));
+		});
+		return buildSection('Lieux de concerts', locList);
+	}
+
+	function buildDatesSection(artist) {
+		var artistDates = getDatesForArtist(artist.id);
+		if (!artistDates || !artistDates.length) {
+			return buildSection('Dates', createEl('p', 'muted', 'Aucune date connue pour cet artiste.'));
+		}
+		var dateList = createEl('ul', 'artist-dates');
+		artistDates.forEach(function (d) {
+			dateList.appendChild(createEl('li', '', formatDateLabel(d)));
+		});
+		return buildSection('Dates', dateList);
+	}
+
+	function buildRelationsSection(artist) {
+		var rel = getRelationsForArtist(artist.id);
+		if (!rel || Object.keys(rel).length === 0) {
+			return buildSection('Dates par lieu', createEl('p', 'muted', 'Aucune relation disponible.'));
+		}
+		var relList = createEl('div', 'artist-relations');
+		Object.keys(rel).forEach(function (locKey) {
+			var group = createEl('div', 'artist-relations__group');
+			group.appendChild(createEl('div', 'artist-relations__loc', formatLocationName(locKey)));
+			var datesArr = rel[locKey] || [];
+			var ul = createEl('ul', 'artist-relations__dates');
+			datesArr.forEach(function (d) {
+				ul.appendChild(createEl('li', '', formatDateLabel(d)));
+			});
+			group.appendChild(ul);
+			relList.appendChild(group);
+		});
+		return buildSection('Dates par lieu', relList);
 	}
 
 	function formatLocationName(loc) {
@@ -282,53 +318,65 @@ document.addEventListener('DOMContentLoaded', function () {
 		hero.appendChild(head);
 
 		var body = createEl('div', 'artist-modal__body');
-		body.appendChild(createEl('h3', '', 'Membres'));
-		body.appendChild(buildMembersList(membersArr));
-		body.appendChild(createEl('p', '', 'Premier album: ' + (artist.firstAlbum || '—')));
+		var mainView = createEl('div', 'artist-main');
+		mainView.appendChild(createEl('h3', '', 'Membres'));
+		mainView.appendChild(buildMembersList(membersArr));
+		mainView.appendChild(createEl('p', '', 'Premier album: ' + (artist.firstAlbum || '—')));
 
-		// Add locations section
-		var locations = getLocationsForArtist(artist.id);
-		if (locations && locations.length > 0) {
-			body.appendChild(createEl('h3', '', 'Lieux de concerts'));
-			var locList = createEl('ul', 'artist-locations');
-			locations.forEach(function (loc) {
-				locList.appendChild(createEl('li', '', formatLocationName(loc)));
-			});
-			body.appendChild(locList);
+		var actions = createEl('div', 'artist-links');
+		var detail = createEl('div', 'artist-detail is-hidden');
+		var detailHeader = createEl('div', 'artist-detail__head');
+		var backBtn = createEl('button', 'artist-link-btn artist-link-btn--ghost', 'Retour');
+		var detailTitle = createEl('h3', '', '');
+		var detailContent = createEl('div', 'artist-detail__content');
+
+		function showMain() {
+			mainView.classList.remove('is-hidden');
+			actions.classList.remove('is-hidden');
+			detail.classList.add('is-hidden');
+			hero.classList.remove('is-hidden');
+			if (modalEl.closeBtn) modalEl.closeBtn.classList.remove('is-hidden');
 		}
 
-		// Add dates section
-		var artistDates = getDatesForArtist(artist.id);
-		if (artistDates && artistDates.length > 0) {
-			body.appendChild(createEl('h3', '', 'Dates'));
-			var dateList = createEl('ul', 'artist-dates');
-			artistDates.forEach(function (d) {
-				dateList.appendChild(createEl('li', '', formatDateLabel(d)));
+		backBtn.type = 'button';
+		backBtn.addEventListener('click', function () {
+			showMain();
+			backBtn.blur();
+		});
+
+		detailHeader.appendChild(backBtn);
+		detailHeader.appendChild(detailTitle);
+		detail.appendChild(detailHeader);
+		detail.appendChild(detailContent);
+
+		function addInfoButton(label, key, builder) {
+			var btn = createEl('button', 'artist-link-btn', label);
+			btn.type = 'button';
+			btn.addEventListener('click', function () {
+				var section = builder();
+				if (!section) {
+					section = buildSection(label, createEl('p', 'muted', 'Données indisponibles pour cet artiste.'));
+				}
+				detailTitle.textContent = label;
+				while (detailContent.firstChild) detailContent.removeChild(detailContent.firstChild);
+				detailContent.appendChild(section);
+				mainView.classList.add('is-hidden');
+				actions.classList.add('is-hidden');
+				detail.classList.remove('is-hidden');
+				hero.classList.add('is-hidden');
+				if (modalEl.closeBtn) modalEl.closeBtn.classList.add('is-hidden');
+				backBtn.focus();
 			});
-			body.appendChild(dateList);
+			actions.appendChild(btn);
 		}
 
-		// Add relations section (dates by location)
-		var rel = getRelationsForArtist(artist.id);
-		if (rel && Object.keys(rel).length > 0) {
-			body.appendChild(createEl('h3', '', 'Dates par lieu'));
-			var relList = createEl('div', 'artist-relations');
-			Object.keys(rel).forEach(function (locKey) {
-				var group = createEl('div', 'artist-relations__group');
-				group.appendChild(createEl('div', 'artist-relations__loc', formatLocationName(locKey)));
-				var datesArr = rel[locKey] || [];
-				var ul = createEl('ul', 'artist-relations__dates');
-				datesArr.forEach(function (d) {
-					ul.appendChild(createEl('li', '', formatDateLabel(d)));
-				});
-				group.appendChild(ul);
-				relList.appendChild(group);
-			});
-			body.appendChild(relList);
-		}
+		addInfoButton('Locations', 'locations', function () { return buildLocationsSection(artist); });
+		addInfoButton('Dates', 'dates', function () { return buildDatesSection(artist); });
+		addInfoButton('Relations', 'relations', function () { return buildRelationsSection(artist); });
 
-		var apiUrl = 'https://groupietrackers.herokuapp.com/api/artists/' + encodeURIComponent(artist.id || artist.name || '');
-		body.appendChild(buildLinks(artist, apiUrl));
+		body.appendChild(mainView);
+		body.appendChild(actions);
+		body.appendChild(detail);
 
 		panel.appendChild(hero);
 		panel.appendChild(body);

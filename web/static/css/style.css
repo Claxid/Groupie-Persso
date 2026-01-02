@@ -141,8 +141,8 @@ body, p, li, a{color:var(--muted-strong)}
 }
 
 .vinyl-frame{
-    width:460px;
-    height:460px;
+    width:520px;
+    height:520px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -155,7 +155,7 @@ body, p, li, a{color:var(--muted-strong)}
     transition:transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
 }
 
-.vinyl-frame:hover{transform:scale(1.08) rotate(-1deg);box-shadow:0 25px 60px rgba(123,58,237,0.45);filter:drop-shadow(0 12px 28px rgba(0,0,0,0.35))}
+.vinyl-frame:hover{transform:scale(1.08) rotate(-1deg);box-shadow:0 0 14px 6px rgba(123,58,237,0.22);filter:none}
 
 .vinyl-cover{
     width:40%;
@@ -173,7 +173,7 @@ body, p, li, a{color:var(--muted-strong)}
 .vinyl-caption{font-size:1.05rem;color:var(--muted);text-align:center;margin-top:6px;letter-spacing:0.2px}
 
 /* Responsive: scale down vinyls on small screens */
-@media(max-width:1400px){.vinyl-frame{width:450px;height:450px}.vinyl-cover{width:42%;height:42%}}
+@media(max-width:1400px){.vinyl-frame{width:480px;height:480px}.vinyl-cover{width:42%;height:42%}}
 @media(max-width:1200px){.vinyl-grid{grid-template-columns: repeat(3, auto)}}
 @media(max-width:1024px){.vinyl-frame{width:360px;height:360px}.vinyl-cover{width:46%;height:46%}}
 @media(max-width:900px){.vinyl-frame{width:280px;height:280px}.vinyl-cover{width:50%;height:50%}.vinyl-grid{grid-template-columns: repeat(2, auto)}.vinyl-grid .vinyl-item:last-child{grid-column: 1 / -1; justify-self:center}}
@@ -183,7 +183,37 @@ body, p, li, a{color:var(--muted-strong)}
 .artist-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;visibility:hidden;opacity:0;transition:opacity .18s ease}
 .artist-modal.open{visibility:visible;opacity:1;background:rgba(0,0,0,0.45)}
 .artist-modal__panel{background:var(--panel-strong);padding:20px;border-radius:14px;max-width:640px;width:90%;box-shadow:0 30px 80px rgba(0,0,0,0.45);border:1px solid var(--glass-border);backdrop-filter:blur(18px)}
-.artist-modal__close{position:absolute;right:12px;top:8px;background:rgba(255,255,255,0.08);color:#fff;border:0;font-size:22px;line-height:1;padding:6px 8px;border-radius:10px;cursor:pointer;border:1px solid var(--glass-border)}
+.artist-modal .artist-modal__close{
+    position:absolute;
+    right:12px;
+    top:8px;
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#ffffff;
+    color:#111;
+    border:2px solid rgba(255,255,255,0.9);
+    font-size:22px;
+    font-weight:800;
+    line-height:1;
+    padding:0;
+    border-radius:12px;
+    cursor:pointer;
+    box-shadow:0 16px 36px rgba(0,0,0,0.55);
+    text-shadow:none;
+    transition:transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+.artist-modal .artist-modal__close:hover{
+    background:#f5f6f8;
+    transform:translateY(-1px) scale(1.03);
+    box-shadow:0 20px 44px rgba(0,0,0,0.6);
+}
+.artist-modal .artist-modal__close:focus{
+    outline:2px solid rgba(0,0,0,0.35);
+    outline-offset:2px;
+}
 .artist-modal__content h2{margin-top:0;margin-bottom:6px}
 .vinyl-caption{font-size:25px;color:var(--muted);text-align:center;margin-top:0px}
 .artist-modal__hero{display:flex;gap:14px;align-items:center;margin-bottom:12px}
@@ -203,9 +233,30 @@ body, p, li, a{color:var(--muted-strong)}
 .artist-relations__dates li{margin-bottom:3px}
 /* Modal links under 'Premier album' */
 .artist-links{margin-top:12px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
-.artist-links a{display:inline-block;color:#fff;text-decoration:none;padding:0.65rem 1.2rem;font-size:1rem;font-weight:600;border-radius:10px;background:var(--accent);border:1px solid var(--glass-border);box-shadow:0 12px 28px rgba(0,0,0,0.35);transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease}
-.artist-links a:hover{transform:translateY(-1px) scale(1.05);box-shadow:0 16px 36px rgba(0,0,0,0.45)}
-.artist-links a:focus{outline:2px solid rgba(123,58,237,0.35);outline-offset:2px}
+.artist-links a,
+.artist-links button{display:inline-block;color:#fff;text-decoration:none;padding:0.65rem 1.2rem;font-size:1rem;font-weight:600;border-radius:10px;background:var(--accent);border:1px solid var(--glass-border);box-shadow:0 12px 28px rgba(0,0,0,0.35);transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;cursor:pointer}
+.artist-links a:hover,
+.artist-links button:hover{transform:translateY(-1px) scale(1.05);box-shadow:0 16px 36px rgba(0,0,0,0.45)}
+.artist-links a:focus,
+.artist-links button:focus{outline:2px solid rgba(123,58,237,0.35);outline-offset:2px}
+.artist-link-btn{background:var(--accent);border:1px solid var(--glass-border)}
+.artist-sections{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.artist-section{padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.04);box-shadow:0 6px 16px rgba(0,0,0,0.25)}
+.artist-section.is-hidden{display:none}
+
+/* Detail view toggling inside the modal */
+.artist-main.is-hidden{display:none}
+.artist-detail{margin-top:12px;padding:12px;border:1px solid var(--glass-border);border-radius:10px;background:rgba(255,255,255,0.04);box-shadow:0 10px 28px rgba(0,0,0,0.28)}
+.artist-detail.is-hidden{display:none}
+.artist-detail__head{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:12px;padding-right:52px}
+.artist-detail__head h3{margin:0}
+.artist-link-btn--ghost{position:absolute;right:0;top:0;background:var(--accent);border:1px solid var(--glass-border);color:#fff;box-shadow:0 10px 24px rgba(123,58,237,0.35);transition:transform 0.15s ease, box-shadow 0.15s ease}
+.artist-link-btn--ghost:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 14px 34px rgba(123,58,237,0.45)}
+.artist-link-btn--ghost:focus{outline:2px solid rgba(123,58,237,0.35);outline-offset:2px}
+.artist-detail__content section{margin:0}
+
+/* Generic hide utility for modal view switches */
+.is-hidden{display:none !important}
 
 /* keep modal content readable on small screens */
 @media(max-width:480px){.artist-modal__hero{flex-direction:column;align-items:flex-start}.artist-cover{width:100%;height:auto}}
@@ -233,7 +284,7 @@ body, p, li, a{color:var(--muted-strong)}
 }
 
 .vinyl-frame{
-    width:460px; /* larger vinyl frames */
+    width:460px;
     height:460px;
     display:flex;
     align-items:center;
@@ -280,13 +331,13 @@ body, p, li, a{color:var(--muted-strong)}
 
 @media(max-width:1024px){
     /* tablets */
-    .vinyl-frame{width:360px;height:360px}
+    .vinyl-frame{width:400px;height:400px}
     .vinyl-cover{width:46%;height:46%}
 }
 
 @media(max-width:900px){
     /* small laptops / large phones */
-    .vinyl-frame{width:280px;height:280px}
+    .vinyl-frame{width:320px;height:320px}
     .vinyl-cover{width:50%;height:50%}
     /* on narrower viewports switch to 2 columns and center last item */
     .vinyl-grid{grid-template-columns: repeat(2, auto)}
@@ -295,16 +346,20 @@ body, p, li, a{color:var(--muted-strong)}
 
 @media(max-width:500px){
     /* phones */
-    .vinyl-frame{width:160px;height:160px}
+    .vinyl-frame{width:180px;height:180px}
     .vinyl-cover{width:68%;height:68%}
+}
+
+/* Keep the hover glow tight around the vinyl (override any earlier definitions) */
+.vinyl-frame:hover{
+    box-shadow:0 0 14px 6px rgba(123,58,237,0.22);
+    filter:none;
 }
 
 /* Modal for artist details */
 .artist-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;visibility:hidden;opacity:0;transition:opacity .18s ease}
 .artist-modal.open{visibility:visible;opacity:1;background:rgba(0,0,0,0.45)}
 .artist-modal__panel{background:var(--bg-overlay);padding:18px;border-radius:12px;max-width:640px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.35)}
-.artist-modal__close{position:absolute;right:12px;top:8px;background:rgba(0,0,0,0.12);color:#111;border:0;font-size:22px;line-height:1;padding:6px 8px;border-radius:6px;cursor:pointer;border:1px solid rgba(0,0,0,0.06)}
-.artist-modal__close:hover{background:rgba(0,0,0,0.18)}
 .artist-modal__content h2{margin-top:0;margin-bottom:6px}
 .vinyl-caption{font-size:25px;color:var(--muted);text-align:center;margin-top:0px}
 
@@ -316,9 +371,12 @@ body, p, li, a{color:var(--muted-strong)}
 .artist-members{margin:0 0 10px 18px}
 .artist-members li{margin-bottom:4px}
 /* Duplicate block normalized to high-contrast buttons */
-.artist-links a{display:inline-block;color:#fff;text-decoration:none;padding:0.45rem 0.7rem;border-radius:10px;background:var(--accent);border:1px solid var(--glass-border);box-shadow:0 12px 28px rgba(0,0,0,0.35);transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease}
-.artist-links a:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(0,0,0,0.45)}
-.artist-links a:focus{outline:2px solid rgba(123,58,237,0.35);outline-offset:2px}
+.artist-links a,
+.artist-links button{display:inline-block;color:#fff;text-decoration:none;padding:0.45rem 0.7rem;border-radius:10px;background:var(--accent);border:1px solid var(--glass-border);box-shadow:0 12px 28px rgba(0,0,0,0.35);transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease}
+.artist-links a:hover,
+.artist-links button:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(0,0,0,0.45)}
+.artist-links a:focus,
+.artist-links button:focus{outline:2px solid rgba(123,58,237,0.35);outline-offset:2px}
 
 /* keep modal content readable on small screens */
 @media(max-width:480px){
