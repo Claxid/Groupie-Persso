@@ -34,7 +34,7 @@ func main() {
 	http.HandleFunc("/", serveIndex)
 
 	// Ensure other app routes return the same index (so local behaviour matches Netlify)
-	routes := []string{"/search", "/filters", "/geoloc"}
+	routes := []string{"/search", "/filters"}
 	for _, rt := range routes {
 		rlocal := rt
 		http.HandleFunc(rlocal, serveIndex)
@@ -43,6 +43,13 @@ func main() {
 	// Serve specific template HTML files from `web/templates/` when requested
 	http.HandleFunc("/search.html", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))
+	})
+	// Geolocation page
+	http.HandleFunc("/geoloc", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "geoloc.html"))
+	})
+	http.HandleFunc("/geoloc.html", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "geoloc.html"))
 	})
 
 	addr := ":8080"
@@ -56,28 +63,31 @@ func main() {
 // Note: the proxy handler is added below to avoid CORS issues when the browser
 // requests the external API. It simply relays the remote response.
 func init() {
-	http.HandleFunc("/api/artists-proxy", func(w http.ResponseWriter, r *http.Request) {
-		// remote API
-		remote := "https://groupietrackers.herokuapp.com/api/artists"
-		client := &http.Client{Timeout: 10 * time.Second}
-		resp, err := client.Get(remote)
-		if err != nil {
-			http.Error(w, "failed to fetch remote API", http.StatusBadGateway)
-			return
-		}
-		defer resp.Body.Close()
+	proxy := func(remote string) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			client := &http.Client{Timeout: 10 * time.Second}
+			resp, err := client.Get(remote)
+			if err != nil {
+				http.Error(w, "failed to fetch remote API", http.StatusBadGateway)
+				return
+			}
+			defer resp.Body.Close()
 
-		// copy selected headers (content-type)
-		if ct := resp.Header.Get("Content-Type"); ct != "" {
-			w.Header().Set("Content-Type", ct)
-		} else {
-			w.Header().Set("Content-Type", "application/json")
-		}
-		// allow same-origin fetches from the browser
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+			if ct := resp.Header.Get("Content-Type"); ct != "" {
+				w.Header().Set("Content-Type", ct)
+			} else {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.Header().Set("Access-Control-Allow-Origin", "*")
 
-		// relay status code and body
-		w.WriteHeader(resp.StatusCode)
-		io.Copy(w, resp.Body)
-	})
+			w.WriteHeader(resp.StatusCode)
+			io.Copy(w, resp.Body)
+		}
+	}
+
+	// Proxies for Groupie Trackers API to avoid CORS in the browser
+	http.HandleFunc("/api/artists-proxy", proxy("https://groupietrackers.herokuapp.com/api/artists"))
+	http.HandleFunc("/api/locations-proxy", proxy("https://groupietrackers.herokuapp.com/api/locations"))
+	http.HandleFunc("/api/dates-proxy", proxy("https://groupietrackers.herokuapp.com/api/dates"))
+	http.HandleFunc("/api/relation-proxy", proxy("https://groupietrackers.herokuapp.com/api/relation"))
 }

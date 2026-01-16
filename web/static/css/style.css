@@ -98,13 +98,10 @@ body{
 @media(max-width:599px){.site-header .container{flex-wrap:wrap}.main-nav{width:100%;justify-content:flex-start;gap:0.5rem}.container{margin:0.5rem;padding:1rem}}
 @media(max-width:600px){.header-search-form{width:100%;gap:0.5rem}.header-search-input{flex:1}}
 
-/* Small improvements: buttons & focus */
 .btn:focus, .main-nav a:focus{outline:2px solid rgba(216,52,52,0.25);outline-offset:2px}
 
-/* Accessibility: ensure readable contrast for text over the overlay */
-body, p, li, a{color:var(--muted-strong)}
+body, p, li, a{color: #000};
 
-/* Vinyl row fixed to bottom: repeated vinyl images */
 .vinyl-area{padding-top:0;padding-bottom:0}
 
 /* Vinyl rows placed inside a `.container` so they sit on same layer */
