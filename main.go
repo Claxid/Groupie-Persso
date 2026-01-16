@@ -1,4 +1,4 @@
-package handler
+package main
 
 import (
 	"io"
@@ -10,6 +10,12 @@ import (
 )
 
 func main() {
+	// Get port from environment or default to 8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	// Serve static files from a single root: web/static
 	staticDir := filepath.Join("web", "static")
 	log.Printf("static root: %s", staticDir)
@@ -68,8 +74,8 @@ func main() {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))
 	})
 
-	addr := ":8080"
-	log.Printf("Starting server on %s — open http://localhost:8080/", addr)
+	addr := ":" + port
+	log.Printf("Starting server on %s — open http://localhost:%s/", addr, port)
 	// start server
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatalf("server failed: %v", err)
