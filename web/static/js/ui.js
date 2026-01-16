@@ -163,6 +163,28 @@ document.addEventListener('DOMContentLoaded', function () {
 			const frame = document.createElement('div');
 			frame.className = 'vinyl-frame';
 
+			// Create audio element for hover music
+			const audio = document.createElement('audio');
+			audio.preload = 'none';
+			audio.volume = 0.3;
+			
+			// Try to get a music preview URL
+			// Using iTunes Search API as a free alternative
+			const artistName = encodeURIComponent(a.name || '');
+			const musicApiUrl = `https://itunes.apple.com/search?term=${artistName}&entity=song&limit=1`;
+			
+			// Fetch music preview asynchronously
+			fetch(musicApiUrl)
+				.then(res => res.json())
+				.then(data => {
+					if (data.results && data.results.length > 0 && data.results[0].previewUrl) {
+						audio.src = data.results[0].previewUrl;
+					}
+				})
+				.catch(err => {
+					console.log('No preview available for', a.name);
+				});
+
 			const cover = document.createElement('img');
 			cover.className = 'vinyl-cover';
 			cover.alt = a.name || '';
@@ -181,6 +203,28 @@ document.addEventListener('DOMContentLoaded', function () {
 			frame.style.cursor = 'pointer';
 			frame.addEventListener('click', function () {
 				openArtistModal(a);
+			});
+
+			// Hover to play/pause music
+			let isPlaying = false;
+			frame.addEventListener('mouseenter', function () {
+				if (audio.src && !isPlaying) {
+					audio.play().then(() => {
+						isPlaying = true;
+						frame.classList.add('playing');
+					}).catch(err => {
+						console.log('Audio play failed:', err);
+					});
+				}
+			});
+
+			frame.addEventListener('mouseleave', function () {
+				if (isPlaying) {
+					audio.pause();
+					audio.currentTime = 0;
+					isPlaying = false;
+					frame.classList.remove('playing');
+				}
 			});
 
 			vinylGrid.appendChild(item);

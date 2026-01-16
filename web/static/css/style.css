@@ -351,8 +351,46 @@ body, p, li, a {
 
 .vinyl-frame:hover {
     transform: scale(1.08) rotate(-1deg);
-    box-shadow: 0 0 14px 6px rgba(123,58,237,0.22);
-    filter: none;
+    box-shadow: 0 25px 60px rgba(123,58,237,0.45);
+    filter: drop-shadow(0 12px 28px rgba(0,0,0,0.35));
+}
+
+/* Animation when music is playing */
+.vinyl-frame.playing {
+    animation: vinylSpin 2s linear infinite, vinylPulse 1.5s ease-in-out infinite;
+}
+
+.vinyl-frame.playing::after {
+    content: '♪';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(123,58,237,0.9);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(123,58,237,0.5);
+    animation: musicNote 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes vinylSpin {
+    from { transform: scale(1.08) rotate(-1deg); }
+    to { transform: scale(1.08) rotate(359deg); }
+}
+
+@keyframes vinylPulse {
+    0%, 100% { box-shadow: 0 25px 60px rgba(123,58,237,0.45); }
+    50% { box-shadow: 0 25px 60px rgba(236,72,153,0.55), 0 0 40px rgba(236,72,153,0.3); }
+}
+
+@keyframes musicNote {
+    from { transform: translateY(0px); opacity: 1; }
+    to { transform: translateY(-3px); opacity: 0.8; }
 }
 
 .vinyl-cover {
