@@ -1,0 +1,834 @@
+h1 {
+    font-size: 2.5em;
+    color: #f8fafc;
+    margin-bottom: 0.5em;
+}
+
+:root {
+    --charcoal: #0d0f14;
+    --panel: rgba(20,22,30,0.55);
+    --panel-strong: rgba(20,22,30,0.75);
+    --muted: #c4c9d4;
+    --muted-strong: #e9ecf5;
+    --gold: #f5c542;
+    --electric: #3b82f6;
+    --accent: linear-gradient(120deg, #7c3aed, #ec4899);
+    --accent-solid: #8b5cf6;
+    --glass-border: rgba(255,255,255,0.08);
+    --radius: 14px;
+    --max-width: 1800px;
+    --shadow-strong: 0 20px 70px rgba(0,0,0,0.4);
+}
+
+/* Reset & base */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color: var(--muted-strong);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-image: linear-gradient(135deg, rgba(12,12,18,0.92) 0%, rgba(15,17,28,0.8) 45%, rgba(10,8,18,0.9) 100%), url('/static/images/Fond_GroupieTracker.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+/* Page container */
+.container {
+    max-width: var(--max-width);
+    margin: 1.25rem auto;
+    padding: 1.25rem 1.5rem;
+    background: var(--panel);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-strong);
+    backdrop-filter: blur(14px);
+}
+
+/* Header */
+.site-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.5rem;
+    background: var(--panel-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    margin-bottom: 1rem;
+}
+
+.site-header h1 {
+    margin: 0;
+    font-family: 'Merriweather', serif;
+    color: #f8fafc;
+    font-size: 1.9rem;
+    letter-spacing: 0.3px;
+}
+
+.site-header .container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+}
+
+.main-nav {
+    margin-left: auto;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.main-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+    transition: all 0.22s ease;
+    font-weight: 650;
+    border: 1px solid transparent;
+}
+
+.main-nav a:hover {
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    border-color: rgba(255,255,255,0.08);
+    transform: translateY(-1px);
+}
+
+.menu-toggle {
+    margin-left: 8px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.06);
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+/* Header search form */
+.header-search-form {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-left: 1rem;
+}
+
+.header-search-input {
+    padding: 0.45rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+.header-search-input:focus {
+    outline: 2px solid rgba(123,58,237,0.3);
+}
+
+.header-search-btn {
+    padding: 0.48rem 0.9rem;
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(123,58,237,0.35);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-search-btn:hover {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 14px 40px rgba(123,58,237,0.45);
+}
+
+.header-search-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.08), rgba(255,255,255,0));
+    transform: translateX(-100%);
+    transition: transform 0.4s ease;
+}
+
+.header-search-btn:hover::after {
+    transform: translateX(0);
+}
+
+/* Hero */
+.hero h2 {
+    font-family: 'Merriweather', serif;
+    font-size: 1.75rem;
+    margin-top: 0;
+    color: #f8fafc;
+}
+
+.hero p {
+    color: var(--muted);
+}
+
+.cta .btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 0.7rem 1.15rem;
+    border-radius: 12px;
+    text-decoration: none;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta .btn:hover {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 18px 46px rgba(0,0,0,0.45);
+}
+
+/* Features / cards */
+.features {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.features article {
+    background: var(--panel);
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+}
+
+.features h3 {
+    margin-bottom: 0.35rem;
+    color: #f8fafc;
+}
+
+/* Footer */
+.site-footer .container {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-align: center;
+    border: 1px solid var(--glass-border);
+    background: var(--panel-strong);
+    border-radius: var(--radius);
+}
+
+/* Utility */
+.muted {
+    color: var(--muted);
+}
+
+/* Responsive */
+@media (min-width: 700px) {
+    .features {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .hero h2 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 599px) {
+    .site-header .container {
+        flex-wrap: wrap;
+    }
+    
+    .main-nav {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .container {
+        margin: 0.5rem;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .header-search-form {
+        width: 100%;
+        gap: 0.5rem;
+    }
+    
+    .header-search-input {
+        flex: 1;
+    }
+}
+
+/* Small improvements: buttons & focus */
+.btn:focus, 
+.main-nav a:focus {
+    outline: 2px solid rgba(216,52,52,0.25);
+    outline-offset: 2px;
+}
+
+/* Accessibility: ensure readable contrast for text over the overlay */
+body, p, li, a {
+    color: var(--muted-strong);
+}
+
+/* Vinyl row fixed to bottom: repeated vinyl images */
+.vinyl-area {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Vinyl rows placed inside a `.container` so they sit on same layer */
+.vinyl-rows {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* grid used when we dynamically generate all artists */
+.vinyl-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    gap: 20px 20px;
+    align-items: start;
+    justify-content: center;
+    justify-items: center;
+    padding: 12px 6px 40px 6px;
+}
+
+.vinyl-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    max-width: 440px;
+    opacity: 0;
+}
+
+.vinyl-frame {
+    width: 420px;
+    height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url('/static/images/vinyle.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    border-radius: 50%;
+    pointer-events: auto;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.vinyl-frame:hover {
+    transform: scale(1.08) rotate(-1deg);
+    box-shadow: 0 0 14px 6px rgba(123,58,237,0.22);
+    filter: none;
+}
+
+.vinyl-cover {
+    width: 40%;
+    height: 40%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+    border: 0.5px solid rgba(255,255,255,0.36);
+    transform: scale(1.18);
+    transition: transform .25s ease, filter .25s ease;
+}
+
+.vinyl-item.fade-in {
+    animation: fadeUp 0.65s ease forwards;
+}
+
+.vinyl-caption {
+    font-size: 1.05rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 6px;
+    letter-spacing: 0.2px;
+}
+
+/* Responsive: scale down vinyls on small screens */
+@media (max-width: 1400px) {
+    .vinyl-frame {
+        width: 380px;
+        height: 380px;
+    }
+    
+    .vinyl-cover {
+        width: 42%;
+        height: 42%;
+    }
+}
+
+@media (max-width: 1200px) {
+    .vinyl-grid {
+        grid-template-columns: repeat(3, auto);
+    }
+}
+
+@media (max-width: 1024px) {
+    .vinyl-frame {
+        width: 320px;
+        height: 320px;
+    }
+    
+    .vinyl-cover {
+        width: 46%;
+        height: 46%;
+    }
+}
+
+@media (max-width: 900px) {
+    .vinyl-frame {
+        width: 260px;
+        height: 260px;
+    }
+    
+    .vinyl-cover {
+        width: 50%;
+        height: 50%;
+    }
+    
+    .vinyl-grid {
+        grid-template-columns: repeat(2, auto);
+    }
+    
+    .vinyl-grid .vinyl-item:last-child {
+        grid-column: 1 / -1;
+        justify-self: center;
+    }
+}
+
+@media (max-width: 500px) {
+    .vinyl-frame {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .vinyl-cover {
+        width: 68%;
+        height: 68%;
+    }
+}
+
+/* Modal for artist details */
+.artist-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .18s ease;
+}
+
+.artist-modal.open {
+    visibility: visible;
+    opacity: 1;
+    background: rgba(0,0,0,0.45);
+}
+
+.artist-modal__panel {
+    background: var(--panel-strong);
+    padding: 20px;
+    border-radius: 14px;
+    max-width: 640px;
+    width: 90%;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(18px);
+}
+
+.artist-modal .artist-modal__close {
+    position: absolute;
+    right: 12px;
+    top: 8px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: #111;
+    border: 2px solid rgba(255,255,255,0.9);
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    padding: 0;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 16px 36px rgba(0,0,0,0.55);
+    text-shadow: none;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.artist-modal .artist-modal__close:hover {
+    background: #f5f6f8;
+    transform: translateY(-1px) scale(1.03);
+    box-shadow: 0 20px 44px rgba(0,0,0,0.6);
+}
+
+.artist-modal .artist-modal__close:focus {
+    outline: 2px solid rgba(0,0,0,0.35);
+    outline-offset: 2px;
+}
+
+.artist-modal__content h2 {
+    margin-top: 0;
+    margin-bottom: 6px;
+}
+
+.vinyl-caption {
+    font-size: 25px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0px;
+}
+
+.artist-modal__hero {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.artist-cover {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+.artist-modal__head h2 {
+    margin: 0 0 6px 0;
+}
+
+.artist-modal__body h3 {
+    margin: 6px 0;
+}
+
+.artist-members {
+    margin: 0 0 10px 18px;
+}
+
+.artist-members li {
+    margin-bottom: 4px;
+}
+
+.artist-locations {
+    margin: 0 0 10px 18px;
+    color: var(--muted);
+}
+
+.artist-locations li {
+    margin-bottom: 4px;
+}
+
+.artist-dates {
+    margin: 0 0 10px 18px;
+    color: var(--muted);
+}
+
+.artist-dates li {
+    margin-bottom: 4px;
+}
+
+.artist-relations {
+    margin: 0 0 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--muted);
+}
+
+.artist-relations__group {
+    padding: 6px 10px;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.03);
+}
+
+.artist-relations__loc {
+    font-weight: 600;
+    color: #f8fafc;
+    margin-bottom: 4px;
+}
+
+.artist-relations__dates {
+    margin: 0 0 6px 14px;
+    padding: 0;
+    list-style: disc;
+    color: var(--muted);
+}
+
+.artist-relations__dates li {
+    margin-bottom: 3px;
+}
+
+/* Modal links under 'Premier album' */
+.artist-links {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.artist-links a,
+.artist-links button {
+    display: inline-block;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.65rem 1.2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    background: var(--accent);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+    cursor: pointer;
+}
+
+.artist-links a:hover,
+.artist-links button:hover {
+    transform: translateY(-1px) scale(1.05);
+    box-shadow: 0 16px 36px rgba(0,0,0,0.45);
+}
+
+.artist-links a:focus,
+.artist-links button:focus {
+    outline: 2px solid rgba(123,58,237,0.35);
+    outline-offset: 2px;
+}
+
+.artist-link-btn {
+    background: var(--accent);
+    border: 1px solid var(--glass-border);
+}
+
+.artist-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.artist-section {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.04);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+}
+
+.artist-section.is-hidden {
+    display: none;
+}
+
+/* Detail view toggling inside the modal */
+.artist-main.is-hidden {
+    display: none;
+}
+
+.artist-detail {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+}
+
+.artist-detail.is-hidden {
+    display: none;
+}
+
+.artist-detail__head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-right: 52px;
+}
+
+.artist-detail__head h3 {
+    margin: 0;
+}
+
+.artist-link-btn--ghost {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: var(--accent);
+    border: 1px solid var(--glass-border);
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(123,58,237,0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.artist-link-btn--ghost:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 14px 34px rgba(123,58,237,0.45);
+}
+
+.artist-link-btn--ghost:focus {
+    outline: 2px solid rgba(123,58,237,0.35);
+    outline-offset: 2px;
+}
+
+.artist-detail__content section {
+    margin: 0;
+}
+
+/* Generic hide utility for modal view switches */
+.is-hidden {
+    display: none !important;
+}
+
+/* keep modal content readable on small screens */
+@media (max-width: 480px) {
+    .artist-modal__hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .artist-cover {
+        width: 100%;
+        height: auto;
+    }
+}
+
+/* Animations */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Center the last vinyl item in the middle column when it's alone on the last row */
+.vinyl-grid .vinyl-item:last-child {
+    grid-column: 2;
+    justify-self: center;
+}
+
+/* Remove extra bottom padding previously added to body */
+.with-vinyl {
+    padding-bottom: 0;
+}
+
+/* Footer should remain visible above vinyl area */
+.site-footer {
+    position: relative;
+    z-index: 2;
+}
+
+/* Remove extra bottom padding previously added to body */
+.with-vinyl{padding-bottom:0}
+
+/* Footer should remain visible above vinyl area */
+.site-footer{position:relative;z-index:2}
+
+/* Responsive: scale down vinyls on small screens */
+@media(max-width:1400px){
+    .vinyl-frame{width:380px;height:380px}
+    .vinyl-cover{width:42%;height:42%}
+}
+
+@media(max-width:1024px){
+    /* tablets */
+    .vinyl-frame{width:320px;height:320px}
+    .vinyl-cover{width:46%;height:46%}
+}
+
+@media(max-width:900px){
+    /* small laptops / large phones */
+    .vinyl-frame{width:260px;height:260px}
+    .vinyl-cover{width:50%;height:50%}
+    /* on narrower viewports switch to 2 columns and center last item */
+    .vinyl-grid{grid-template-columns: repeat(2, auto)}
+    .vinyl-grid .vinyl-item:last-child{grid-column: 1 / -1; justify-self:center}
+}
+
+@media(max-width:500px){
+    /* phones */
+    .vinyl-frame{width:150px;height:150px}
+    .vinyl-cover{width:68%;height:68%}
+}
+
+/* Keep the hover glow tight around the vinyl (override any earlier definitions) */
+.vinyl-frame:hover{
+    box-shadow:0 0 14px 6px rgba(123,58,237,0.22);
+    filter:none;
+}
+
+/* Modal for artist details */
+.artist-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;visibility:hidden;opacity:0;transition:opacity .18s ease}
+.artist-modal.open{visibility:visible;opacity:1;background:rgba(0,0,0,0.45)}
+.artist-modal__panel{background:var(--bg-overlay);padding:18px;border-radius:12px;max-width:640px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.35)}
+.artist-modal__content h2{margin-top:0;margin-bottom:6px}
+.vinyl-caption{font-size:25px;color:var(--muted);text-align:center;margin-top:0px}
+
+/* nicer modal layout */
+.artist-modal__hero{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.artist-cover{width:140px;height:140px;object-fit:cover;border-radius:6px;box-shadow:0 8px 20px rgba(0,0,0,0.25)}
+.artist-modal__head h2{margin:0 0 6px 0}
+.artist-modal__body h3{margin:6px 0}
+.artist-members{margin:0 0 10px 18px}
+.artist-members li{margin-bottom:4px}
+/* Duplicate block normalized to high-contrast buttons */
+.artist-links a,
+.artist-links button{display:inline-block;color:#fff;text-decoration:none;padding:0.45rem 0.7rem;border-radius:10px;background:var(--accent);border:1px solid var(--glass-border);box-shadow:0 12px 28px rgba(0,0,0,0.35);transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease}
+.artist-links a:hover,
+.artist-links button:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(0,0,0,0.45)}
+.artist-links a:focus,
+.artist-links button:focus{outline:2px solid rgba(123,58,237,0.35);outline-offset:2px}
+
+/* keep modal content readable on small screens */
+@media(max-width:480px){
+    .artist-modal__hero{flex-direction:column;align-items:flex-start}
+    .artist-cover{width:100%;height:auto}
+}

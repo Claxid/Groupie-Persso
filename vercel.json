@@ -1,20 +1,18 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/index.go",
-      "use": "@vercel/go"
-    }
-  ],
+  "buildCommand": "echo 'No build needed'",
+  "outputDirectory": "public",
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/handler.go"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/api/index.go"
+      "dest": "/index.html"
     }
-  ],
-  "functions": {
-    "api/index.go": {
-      "includeFiles": "**"
-    }
-  }
+  ]
 }
