@@ -169,69 +169,96 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			// Create audio element for click-to-play music
 			const audio = document.createElement('audio');
-			audio.preload = 'metadata';
+			audio.preload = 'auto';
 			audio.volume = 0.85;
 			audio.crossOrigin = 'anonymous';
-			// Keep audio in DOM for compatibility
 			audio.style.display = 'none';
 			item.appendChild(audio);
 			
+			// Track loading state
+			let audioReady = false;
+			let audioLoading = false;
+			
+			audio.addEventListener('canplaythrough', function() {
+				audioReady = true;
+				console.log('✅ Audio loaded and ready for:', a.name);
+			});
+			
+			audio.addEventListener('error', function(e) {
+				console.error('❌ Audio loading error for', a.name, ':', e);
+				audioReady = false;
+			});
+			
 			// Function to fetch music from multiple APIs
 			async function fetchMusicPreview(artistName) {
+				if (audioLoading) return null;
+				audioLoading = true;
+				
 				const encodedName = encodeURIComponent(artistName);
+				console.log('🎵 Searching music for:', artistName);
 				
 				// Try iTunes API first (30 second previews)
 				try {
-					console.log('🎵 Searching music for:', artistName);
 					const itunesUrl = `https://itunes.apple.com/search?term=${encodedName}&entity=song&limit=1&media=music`;
+					console.log('📡 Fetching from iTunes:', itunesUrl);
 					const itunesRes = await fetch(itunesUrl);
 					const itunesData = await itunesRes.json();
+					console.log('📦 iTunes response:', itunesData);
 					
 					if (itunesData.results && itunesData.results.length > 0) {
 						let preview = itunesData.results[0].previewUrl;
-						// force https to avoid mixed-content blocking
-						if (preview && preview.startsWith('http://')) {
-							preview = preview.replace('http://', 'https://');
-						}
 						if (preview) {
+							if (preview.startsWith('http://')) {
+								preview = preview.replace('http://', 'https://');
+							}
 							console.log('✅ iTunes preview found:', preview);
+							audioLoading = false;
 							return preview;
 						}
 					}
+					console.log('⚠️ No iTunes results for:', artistName);
 				} catch (err) {
-					console.warn('iTunes API failed:', err);
+					console.error('❌ iTunes API error:', err);
 				}
 				
-				// Try Deezer API as fallback (30 second previews)
+				// Try Deezer API as fallback
 				try {
 					const deezerUrl = `https://api.deezer.com/search?q=${encodedName}&limit=1`;
+					console.log('📡 Fetching from Deezer:', deezerUrl);
 					const deezerRes = await fetch(deezerUrl);
 					const deezerData = await deezerRes.json();
+					console.log('📦 Deezer response:', deezerData);
 					
 					if (deezerData.data && deezerData.data.length > 0) {
 						let preview = deezerData.data[0].preview;
-						if (preview && preview.startsWith('http://')) {
-							preview = preview.replace('http://', 'https://');
-						}
 						if (preview) {
+							if (preview.startsWith('http://')) {
+								preview = preview.replace('http://', 'https://');
+							}
 							console.log('✅ Deezer preview found:', preview);
+							audioLoading = false;
 							return preview;
 						}
 					}
+					console.log('⚠️ No Deezer results for:', artistName);
 				} catch (err) {
-					console.warn('Deezer API failed:', err);
+					console.error('❌ Deezer API error:', err);
 				}
 				
 				console.warn('❌ No preview found for:', artistName);
+				audioLoading = false;
 				return null;
 			}
 			
-			// Fetch and set audio source
+			// Fetch and set audio source immediately
 			fetchMusicPreview(a.name || '').then(previewUrl => {
 				if (previewUrl) {
+					console.log('🔗 Setting audio src:', previewUrl);
 					audio.src = previewUrl;
 					audio.load();
-					console.log('🎧 Audio ready for:', a.name);
+				} else {
+					console.warn('⚠️ No audio source set for:', a.name);
+				}
 				}
 			});
 
@@ -255,16 +282,23 @@ document.addEventListener('DOMContentLoaded', function () {
 			
 			frame.style.cursor = 'pointer';
 			frame.addEventListener('click', function (e) {
-				// Toggle music play/pause
+				console.log('🖱️ Vinyl clicked for:', a.name, 'Audio src:', audio.src, 'Ready:', audioReady);
+				
+				// If no audio source yet, fetch it now
 				if (!audio.src) {
-					console.log('⚠️ No audio source for:', a.name);
-					// Try to fetch now, then play once ready
+					console.log('⏳ No audio source, fetching now...');
 					fetchMusicPreview(a.name || '').then(previewUrl => {
 						if (previewUrl) {
 							audio.src = previewUrl;
 							audio.load();
-							// attempt play after short delay to ensure metadata readiness
-							setTimeout(() => frame.click(), 100);
+							// Wait a bit for metadata to load, then try to play
+							setTimeout(() => {
+								console.log('🔄 Retrying play after fetch...');
+								frame.click();
+							}, 500);
+						} else {
+							console.error('❌ Failed to fetch preview for:', a.name);
+							alert('Désolé, aucune musique disponible pour ' + a.name);
 						}
 					});
 					return;
@@ -273,26 +307,48 @@ document.addEventListener('DOMContentLoaded', function () {
 				if (!isPlaying && !playAttempted) {
 					playAttempted = true;
 					console.log('▶️ Attempting to play audio for:', a.name);
+					console.log('🔊 Audio element state:', {
+						src: audio.src,
+						readyState: audio.readyState,
+						paused: audio.paused,
+						volume: audio.volume,
+						duration: audio.duration
+					});
 
 					// Stop any previously playing audio
 					if (currentAudio && currentAudio !== audio) {
-						try { currentAudio.pause(); currentAudio.currentTime = 0; } catch(_){}
+						try { 
+							currentAudio.pause(); 
+							currentAudio.currentTime = 0;
+							console.log('⏹️ Stopped previous audio');
+						} catch(_){}
 						if (currentFrame) { currentFrame.classList.remove('playing'); }
 					}
 					
-					audio.play()
-						.then(() => {
-							isPlaying = true;
-							playAttempted = false;
-							frame.classList.add('playing');
-							currentAudio = audio;
-							currentFrame = frame;
-							console.log('✅ Audio playing for:', a.name);
-						})
-						.catch(err => {
-							playAttempted = false;
-							console.error('❌ Audio play failed for', a.name, ':', err.message);
-						});
+					const playPromise = audio.play();
+					if (playPromise !== undefined) {
+						playPromise
+							.then(() => {
+								isPlaying = true;
+								playAttempted = false;
+								frame.classList.add('playing');
+								currentAudio = audio;
+								currentFrame = frame;
+								console.log('✅ Audio playing successfully for:', a.name);
+							})
+							.catch(err => {
+								playAttempted = false;
+								console.error('❌ Audio play failed for', a.name);
+								console.error('Error details:', err);
+								console.error('Audio state:', {
+									src: audio.src,
+									readyState: audio.readyState,
+									networkState: audio.networkState,
+									error: audio.error
+								});
+								alert('Erreur de lecture audio: ' + err.message);
+							});
+					}
 				} else if (isPlaying) {
 					console.log('⏹️ Stopping audio for:', a.name);
 					audio.pause();
