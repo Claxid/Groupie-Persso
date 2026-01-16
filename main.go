@@ -74,6 +74,10 @@ func main() {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))
 	})
 
+	http.HandleFunc("/geoloc.html", func(w http.ResponseWriter, r *http.Request){
+		http.ServeFile(w, r, filepath.Join("web", "templates", "geoloc.html"))
+	})
+
 	addr := ":" + port
 	log.Printf("Starting server on %s — open http://localhost:%s/", addr, port)
 	// start server
