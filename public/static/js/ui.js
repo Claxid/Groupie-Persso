@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			// Create audio element for click-to-play music
 			const audio = document.createElement('audio');
 			audio.preload = 'metadata';
-			audio.volume = 0.3;
+			audio.volume = 0.85;
 			audio.crossOrigin = 'anonymous';
 			// Keep audio in DOM for compatibility
 			audio.style.display = 'none';
