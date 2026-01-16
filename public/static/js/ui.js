@@ -165,25 +165,61 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			// Create audio element for hover music
 			const audio = document.createElement('audio');
-			audio.preload = 'none';
+			audio.preload = 'metadata';
 			audio.volume = 0.3;
+			audio.crossOrigin = 'anonymous';
 			
-			// Try to get a music preview URL
-			// Using iTunes Search API as a free alternative
-			const artistName = encodeURIComponent(a.name || '');
-			const musicApiUrl = `https://itunes.apple.com/search?term=${artistName}&entity=song&limit=1`;
-			
-			// Fetch music preview asynchronously
-			fetch(musicApiUrl)
-				.then(res => res.json())
-				.then(data => {
-					if (data.results && data.results.length > 0 && data.results[0].previewUrl) {
-						audio.src = data.results[0].previewUrl;
+			// Function to fetch music from multiple APIs
+			async function fetchMusicPreview(artistName) {
+				const encodedName = encodeURIComponent(artistName);
+				
+				// Try iTunes API first (30 second previews)
+				try {
+					console.log('🎵 Searching music for:', artistName);
+					const itunesUrl = `https://itunes.apple.com/search?term=${encodedName}&entity=song&limit=1&media=music`;
+					const itunesRes = await fetch(itunesUrl);
+					const itunesData = await itunesRes.json();
+					
+					if (itunesData.results && itunesData.results.length > 0) {
+						const preview = itunesData.results[0].previewUrl;
+						if (preview) {
+							console.log('✅ iTunes preview found:', preview);
+							return preview;
+						}
 					}
-				})
-				.catch(err => {
-					console.log('No preview available for', a.name);
-				});
+				} catch (err) {
+					console.warn('iTunes API failed:', err);
+				}
+				
+				// Try Deezer API as fallback (30 second previews)
+				try {
+					const deezerUrl = `https://api.deezer.com/search?q=${encodedName}&limit=1`;
+					const deezerRes = await fetch(deezerUrl);
+					const deezerData = await deezerRes.json();
+					
+					if (deezerData.data && deezerData.data.length > 0) {
+						const preview = deezerData.data[0].preview;
+						if (preview) {
+							console.log('✅ Deezer preview found:', preview);
+							return preview;
+						}
+					}
+				} catch (err) {
+					console.warn('Deezer API failed:', err);
+				}
+				
+				console.warn('❌ No preview found for:', artistName);
+				return null;
+			}
+			
+			// Fetch and set audio source
+			fetchMusicPreview(a.name || '').then(previewUrl => {
+				if (previewUrl) {
+					audio.src = previewUrl;
+					audio.load();
+					console.log('🎧 Audio ready for:', a.name);
+				}
+			});
 
 			const cover = document.createElement('img');
 			cover.className = 'vinyl-cover';
@@ -207,24 +243,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			// Hover to play/pause music
 			let isPlaying = false;
+			let playAttempted = false;
+			
 			frame.addEventListener('mouseenter', function () {
-				if (audio.src && !isPlaying) {
-					audio.play().then(() => {
-						isPlaying = true;
-						frame.classList.add('playing');
-					}).catch(err => {
-						console.log('Audio play failed:', err);
-					});
+				if (!audio.src) {
+					console.log('⚠️ No audio source for:', a.name);
+					return;
+				}
+				
+				if (!isPlaying && !playAttempted) {
+					playAttempted = true;
+					console.log('▶️ Attempting to play audio for:', a.name);
+					
+					audio.play()
+						.then(() => {
+							isPlaying = true;
+							playAttempted = false;
+							frame.classList.add('playing');
+							console.log('✅ Audio playing for:', a.name);
+						})
+						.catch(err => {
+							playAttempted = false;
+							console.error('❌ Audio play failed for', a.name, ':', err.message);
+							// Show visual feedback even if audio fails
+							frame.classList.add('playing');
+							setTimeout(() => {
+								frame.classList.remove('playing');
+							}, 500);
+						});
 				}
 			});
 
 			frame.addEventListener('mouseleave', function () {
 				if (isPlaying) {
+					console.log('⏸️ Stopping audio for:', a.name);
 					audio.pause();
 					audio.currentTime = 0;
 					isPlaying = false;
 					frame.classList.remove('playing');
+				} else {
+					frame.classList.remove('playing');
 				}
+				playAttempted = false;
 			});
 
 			vinylGrid.appendChild(item);
