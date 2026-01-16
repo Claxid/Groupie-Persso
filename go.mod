@@ -1,3 +1,3 @@
 module groupie-tracker-localisation.netlify.app/m
 
-go 1.25.0
+go 1.21
