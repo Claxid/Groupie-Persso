@@ -235,17 +235,13 @@ document.addEventListener('DOMContentLoaded', function () {
 			caption.textContent = a.name || '';
 			item.appendChild(caption);
 
-			// clicking the vinyl opens the artist modal
-			frame.style.cursor = 'pointer';
-			frame.addEventListener('click', function () {
-				openArtistModal(a);
-			});
-
-			// Hover to play/pause music
+			// Toggle play/pause music on click
 			let isPlaying = false;
 			let playAttempted = false;
 			
-			frame.addEventListener('mouseenter', function () {
+			frame.style.cursor = 'pointer';
+			frame.addEventListener('click', function (e) {
+				// Toggle music play/pause
 				if (!audio.src) {
 					console.log('⚠️ No audio source for:', a.name);
 					return;
@@ -265,26 +261,27 @@ document.addEventListener('DOMContentLoaded', function () {
 						.catch(err => {
 							playAttempted = false;
 							console.error('❌ Audio play failed for', a.name, ':', err.message);
-							// Show visual feedback even if audio fails
-							frame.classList.add('playing');
-							setTimeout(() => {
-								frame.classList.remove('playing');
-							}, 500);
 						});
-				}
-			});
-
-			frame.addEventListener('mouseleave', function () {
-				if (isPlaying) {
-					console.log('⏸️ Stopping audio for:', a.name);
+				} else if (isPlaying) {
+					console.log('⏹️ Stopping audio for:', a.name);
 					audio.pause();
 					audio.currentTime = 0;
 					isPlaying = false;
 					frame.classList.remove('playing');
-				} else {
+					playAttempted = false;
+				}
+			});
+			
+			// Double-click to open artist modal
+			frame.addEventListener('dblclick', function () {
+				// Stop music if playing
+				if (isPlaying) {
+					audio.pause();
+					audio.currentTime = 0;
+					isPlaying = false;
 					frame.classList.remove('playing');
 				}
-				playAttempted = false;
+				openArtistModal(a);
 			});
 
 			vinylGrid.appendChild(item);
