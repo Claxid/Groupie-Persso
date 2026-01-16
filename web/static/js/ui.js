@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	const REMOTE_DATES_API = 'https://groupietrackers.herokuapp.com/api/dates';
 	const LOCAL_RELATIONS_API = '/api/relations-proxy';
 	const REMOTE_RELATIONS_API = 'https://groupietrackers.herokuapp.com/api/relation';
+	const FALLBACK_PREVIEW = 'https://samplelib.com/lib/preview/mp3/sample-3s.mp3';
 	const vinylGrid = document.querySelector('.vinyl-area .vinyl-grid');
 	if (!vinylGrid) return;
 
@@ -280,7 +281,9 @@ document.addEventListener('DOMContentLoaded', function () {
 					audio.src = previewUrl;
 					audio.load();
 				} else {
-					console.warn('⚠️ No audio source set for:', a.name);
+					console.warn('⚠️ No audio preview found, using fallback for:', a.name);
+					audio.src = FALLBACK_PREVIEW;
+					audio.load();
 				}
 				}
 			});
@@ -369,7 +372,15 @@ document.addEventListener('DOMContentLoaded', function () {
 									networkState: audio.networkState,
 									error: audio.error
 								});
-								alert('Erreur de lecture audio: ' + err.message);
+								// try fallback once if not already on fallback
+								if (audio.src !== FALLBACK_PREVIEW) {
+									console.warn('⚠️ Retrying with fallback audio for:', a.name);
+									audio.src = FALLBACK_PREVIEW;
+									audio.load();
+									setTimeout(() => frame.click(), 300);
+								} else {
+									alert('Erreur de lecture audio: ' + err.message);
+								}
 							});
 					}
 				} else if (isPlaying) {
