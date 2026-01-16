@@ -70,6 +70,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	let datesData = null;
 	let relationsData = null;
 
+	// Ensure only one audio plays at a time
+	let currentAudio = null;
+	let currentFrame = null;
+
 	async function tryFetch(url) {
 		const res = await fetch(url, {cache: 'no-store'});
 		if (!res.ok) throw new Error('API response ' + res.status);
@@ -163,11 +167,14 @@ document.addEventListener('DOMContentLoaded', function () {
 			const frame = document.createElement('div');
 			frame.className = 'vinyl-frame';
 
-			// Create audio element for hover music
+			// Create audio element for click-to-play music
 			const audio = document.createElement('audio');
 			audio.preload = 'metadata';
 			audio.volume = 0.3;
 			audio.crossOrigin = 'anonymous';
+			// Keep audio in DOM for compatibility
+			audio.style.display = 'none';
+			item.appendChild(audio);
 			
 			// Function to fetch music from multiple APIs
 			async function fetchMusicPreview(artistName) {
@@ -181,7 +188,11 @@ document.addEventListener('DOMContentLoaded', function () {
 					const itunesData = await itunesRes.json();
 					
 					if (itunesData.results && itunesData.results.length > 0) {
-						const preview = itunesData.results[0].previewUrl;
+						let preview = itunesData.results[0].previewUrl;
+						// force https to avoid mixed-content blocking
+						if (preview && preview.startsWith('http://')) {
+							preview = preview.replace('http://', 'https://');
+						}
 						if (preview) {
 							console.log('✅ iTunes preview found:', preview);
 							return preview;
@@ -198,7 +209,10 @@ document.addEventListener('DOMContentLoaded', function () {
 					const deezerData = await deezerRes.json();
 					
 					if (deezerData.data && deezerData.data.length > 0) {
-						const preview = deezerData.data[0].preview;
+						let preview = deezerData.data[0].preview;
+						if (preview && preview.startsWith('http://')) {
+							preview = preview.replace('http://', 'https://');
+						}
 						if (preview) {
 							console.log('✅ Deezer preview found:', preview);
 							return preview;
@@ -244,18 +258,35 @@ document.addEventListener('DOMContentLoaded', function () {
 				// Toggle music play/pause
 				if (!audio.src) {
 					console.log('⚠️ No audio source for:', a.name);
+					// Try to fetch now, then play once ready
+					fetchMusicPreview(a.name || '').then(previewUrl => {
+						if (previewUrl) {
+							audio.src = previewUrl;
+							audio.load();
+							// attempt play after short delay to ensure metadata readiness
+							setTimeout(() => frame.click(), 100);
+						}
+					});
 					return;
 				}
 				
 				if (!isPlaying && !playAttempted) {
 					playAttempted = true;
 					console.log('▶️ Attempting to play audio for:', a.name);
+
+					// Stop any previously playing audio
+					if (currentAudio && currentAudio !== audio) {
+						try { currentAudio.pause(); currentAudio.currentTime = 0; } catch(_){}
+						if (currentFrame) { currentFrame.classList.remove('playing'); }
+					}
 					
 					audio.play()
 						.then(() => {
 							isPlaying = true;
 							playAttempted = false;
 							frame.classList.add('playing');
+							currentAudio = audio;
+							currentFrame = frame;
 							console.log('✅ Audio playing for:', a.name);
 						})
 						.catch(err => {
@@ -269,6 +300,7 @@ document.addEventListener('DOMContentLoaded', function () {
 					isPlaying = false;
 					frame.classList.remove('playing');
 					playAttempted = false;
+					if (currentAudio === audio) { currentAudio = null; currentFrame = null; }
 				}
 			});
 			
