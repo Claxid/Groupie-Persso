@@ -34,8 +34,8 @@ body{
 /* Layout container */
 .container{
     max-width:var(--max-width);
-    margin: clamp(0.75rem, 2vw, 1.25rem) auto;
-    padding: clamp(1rem, 3vw, 1.5rem);
+    margin:1.25rem auto;
+    padding:1.25rem 1.5rem;
     background:var(--panel);
     border-radius:var(--radius);
     box-shadow:var(--shadow-strong);
@@ -45,22 +45,22 @@ body{
 
 /* Header */
 .site-header{flex-wrap:wrap}
-.header-actions{display:flex;gap: clamp(0.4rem, 1vw, 0.6rem);align-items:center;margin-left:auto}
-.back-btn{display:inline-block;background:rgba(255,255,255,0.06);color:#f8fafc;padding: clamp(0.35rem, 1vw, 0.5rem) clamp(0.5rem, 1.5vw, 0.75rem);text-decoration:none;border:1px solid var(--glass-border);border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.25);transition:transform 0.18s ease, box-shadow 0.18s ease;font-size: clamp(0.85rem, 1.5vw, 1rem)}
+.header-actions{display:flex;gap:0.6rem;align-items:center;margin-left:auto}
+.back-btn{display:inline-block;background:rgba(255,255,255,0.06);color:#f8fafc;padding:0.5rem 0.75rem;text-decoration:none;border:1px solid var(--glass-border);border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.25);transition:transform 0.18s ease, box-shadow 0.18s ease}
 .back-btn:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(0,0,0,0.35)}
 
 /* Form */
-.search-form{display:flex;flex-direction:column;gap: clamp(0.6rem, 1.5vw, 0.9rem)}
-.search-form label{color:var(--muted);font-weight:600;font-size: clamp(0.9rem, 1.5vw, 1rem)}
+.search-form{display:flex;flex-direction:column;gap:0.9rem}
+.search-form label{color:var(--muted);font-weight:600}
 .input-stack{position:relative}
 .search-form input[type="text"]{
     width:100%;
-    padding: clamp(0.5rem, 1.5vw, 0.75rem) clamp(0.6rem, 1.5vw, 0.9rem);
+    padding:0.75rem 0.9rem;
     border-radius:12px;
     border:1px solid var(--glass-border);
     background:rgba(255,255,255,0.06);
     color:#f8fafc;
-    font-size: clamp(0.9rem, 1.5vw, 1rem);
+    font-size:1rem;
 }
 .search-form input[type="text"]:focus{outline:2px solid rgba(123,58,237,0.35)}
 
@@ -81,20 +81,19 @@ body{
 .suggestions.show{display:block}
 .suggestions button{
     width:100%;
-    padding: clamp(0.45rem, 1vw, 0.65rem) clamp(0.6rem, 1.5vw, 0.9rem);
+    padding:0.65rem 0.9rem;
     background:transparent;
     color:#f8fafc;
     border:0;
     text-align:left;
     cursor:pointer;
     transition: background 0.15s ease;
-    font-size: clamp(0.85rem, 1.5vw, 0.95rem);
 }
 .suggestions button:hover{background:rgba(255,255,255,0.06)}
 
-.quick-filters{display:flex;flex-wrap:wrap;gap: clamp(0.4rem, 1vw, 0.5rem)}
+.quick-filters{display:flex;flex-wrap:wrap;gap:0.5rem}
 .chip{
-    padding: clamp(0.3rem, 1vw, 0.45rem) clamp(0.5rem, 1.5vw, 0.75rem);
+    padding:0.45rem 0.75rem;
     border-radius:999px;
     border:1px solid var(--glass-border);
     background:rgba(255,255,255,0.06);
@@ -102,14 +101,13 @@ body{
     cursor:pointer;
     transition:transform 0.18s ease, box-shadow 0.18s ease, background 0.3s ease;
     box-shadow:0 10px 25px rgba(0,0,0,0.25);
-    font-size: clamp(0.8rem, 1.5vw, 0.9rem);
 }
 .chip:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(0,0,0,0.35)}
 .chip.active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 14px 40px rgba(123,58,237,0.45)}
 
-.actions{display:flex;gap: clamp(0.5rem, 1.5vw, 0.75rem);flex-wrap:wrap}
+.actions{display:flex;gap:0.75rem;flex-wrap:wrap}
 .btn-primary{
-    padding: clamp(0.45rem, 1vw, 0.65rem) clamp(0.8rem, 1.5vw, 1.1rem);
+    padding:0.65rem 1.1rem;
     border-radius:12px;
     border:1px solid var(--glass-border);
     background:var(--accent);
@@ -117,19 +115,17 @@ body{
     cursor:pointer;
     box-shadow:0 14px 40px rgba(0,0,0,0.35);
     transition:transform 0.18s ease, box-shadow 0.18s ease;
-    font-size: clamp(0.85rem, 1.5vw, 1rem);
 }
 .btn-primary:hover{transform:translateY(-1px) scale(1.01);box-shadow:0 18px 46px rgba(0,0,0,0.45)}
 
 .btn-ghost{
-    padding: clamp(0.45rem, 1vw, 0.65rem) clamp(0.8rem, 1.5vw, 1.1rem);
+    padding:0.65rem 1.1rem;
     border-radius:12px;
     border:1px solid var(--glass-border);
     background:rgba(255,255,255,0.06);
     color:#f8fafc;
     cursor:pointer;
     transition:transform 0.18s ease, box-shadow 0.18s ease;
-    font-size: clamp(0.85rem, 1.5vw, 1rem);
 }
 .btn-ghost:hover{transform:translateY(-1px);box-shadow:0 14px 32px rgba(0,0,0,0.35)}
 
@@ -137,8 +133,8 @@ body{
 #results{
     margin-top:1rem;
     display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(clamp(180px, 30vw, 220px), 1fr));
-    gap: clamp(12px, 2vw, 16px);
+    grid-template-columns:repeat(auto-fill, minmax(220px, 1fr));
+    gap:16px;
     align-items:start;
 }
 .artist-card{
@@ -158,31 +154,31 @@ body{
 .artist-media img{
     display:block;
     width:100%;
-    height: clamp(120px, 25vw, 160px);
+    height:160px;
     object-fit:cover;
 }
 .artist-body{
-    padding: clamp(8px, 2vw, 12px);
+    padding:12px;
     display:flex;
     flex-direction:column;
     gap:6px;
 }
 .artist-body h2{
     margin:0;
-    font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+    font-size:1.05rem;
     color:#f8fafc;
 }
 .artist-meta{
     margin:0;
     color:var(--muted);
-    font-size: clamp(0.8rem, 1.2vw, 0.9rem);
+    font-size:0.9rem;
 }
 /* Modal: links under 'Premier album' */
 .artist-links{
     margin-top:8px;
     display:flex;
     flex-wrap:wrap;
-    gap: clamp(4px, 1vw, 8px);
+    gap:8px;
     margin-left: 20px;
 }
 .artist-links a{
