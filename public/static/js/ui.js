@@ -108,11 +108,16 @@ document.addEventListener('DOMContentLoaded', function () {
 	async function loadRelations() {
 		try {
 			relationsData = await tryFetch(LOCAL_RELATIONS_API);
+			console.log('✅ Relations loaded from local proxy');
 		} catch (err) {
+			console.warn('⚠️ Local relations API failed, trying remote...', err);
 			try {
 				relationsData = await tryFetch(REMOTE_RELATIONS_API);
+				console.log('✅ Relations loaded from remote API');
 			} catch (err2) {
-				console.warn('Failed to load relations from both proxy and remote API', err, err2);
+				console.error('❌ Failed to load relations from both APIs', err, err2);
+				// Don't fail, just continue without relations
+				relationsData = { index: [] };
 			}
 		}
 	}
@@ -136,24 +141,42 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 
 	async function loadArtists() {
-		// Load supporting data first
-		await Promise.all([loadLocations(), loadDates(), loadRelations()]);
+		// Load supporting data first, but don't block on failures
+		try {
+			await Promise.all([
+				loadLocations().catch(e => console.warn('Locations load failed:', e)),
+				loadDates().catch(e => console.warn('Dates load failed:', e)),
+				loadRelations().catch(e => console.warn('Relations load failed:', e))
+			]);
+			console.log('✅ All supplementary data loaded (or failed gracefully)');
+		} catch (err) {
+			console.warn('⚠️ Some supplementary data failed to load, continuing...', err);
+		}
 
 		let data;
 		try {
+			console.log('📡 Fetching artists from local proxy...');
 			data = await tryFetch(LOCAL_API);
+			console.log('✅ Artists loaded from local proxy');
 		} catch (err) {
+			console.warn('⚠️ Local proxy failed, trying remote API...', err);
 			// fallback to remote API if local proxy fails
 			try {
 				data = await tryFetch(REMOTE_API);
+				console.log('✅ Artists loaded from remote API');
 			} catch (err2) {
-				console.warn('Failed to load artists from both proxy and remote API', err, err2);
+				console.error('❌ Failed to load artists from both APIs', err, err2);
 				return;
 			}
 		}
 
 		const artists = Array.isArray(data) ? data : (data.artists || data);
-		if (!artists || !artists.length) return;
+		if (!artists || !artists.length) {
+			console.error('❌ No artists data found');
+			return;
+		}
+
+		console.log(`✅ Found ${artists.length} artists, creating vinyl items...`);
 
 		// clear grid first (idempotent)
 		vinylGrid.innerHTML = '';
