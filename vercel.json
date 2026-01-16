@@ -8,8 +8,17 @@
   ],
   "routes": [
     {
+      "src": "/static/(.*)",
+      "dest": "/web/static/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/api/index.go"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.go": {
+      "includeFiles": "**"
+    }
+  }
 }

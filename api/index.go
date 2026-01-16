@@ -1,4 +1,4 @@
-package handler
+package main
 
 import (
 	"io"
@@ -32,14 +32,41 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// All other routes serve index.html (SPA behavior)
-	http.ServeFile(w, r, "index.html")
+	indexPath := filepath.Join(".", "index.html")
+	// Try different possible paths
+	if _, err := os.Stat(indexPath); os.IsNotExist(err) {
+		indexPath = filepath.Join("..", "index.html")
+	}
+	if _, err := os.Stat(indexPath); os.IsNotExist(err) {
+		http.Error(w, "index.html not found", http.StatusNotFound)
+		return
+	}
+	http.ServeFile(w, r, indexPath)
 }
 
 func handleStatic(w http.ResponseWriter, r *http.Request) {
 	reqPath := r.URL.Path[len("/static/"):]
-	full := filepath.Join("web", "static", filepath.FromSlash(reqPath))
 
-	if fi, err := os.Stat(full); err == nil && !fi.IsDir() {
+	// Try multiple possible base paths
+	possiblePaths := []string{
+		filepath.Join("web", "static", filepath.FromSlash(reqPath)),
+		filepath.Join("..", "web", "static", filepath.FromSlash(reqPath)),
+		filepath.Join(".", "web", "static", filepath.FromSlash(reqPath)),
+	}
+
+	var full string
+	var fi os.FileInfo
+	var err error
+
+	for _, path := range possiblePaths {
+		fi, err = os.Stat(path)
+		if err == nil && !fi.IsDir() {
+			full = path
+			break
+		}
+	}
+
+	if full != "" {
 		// Set correct content-type based on file extension
 		ext := filepath.Ext(full)
 		switch ext {
@@ -70,8 +97,19 @@ func handleStatic(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveTemplate(w http.ResponseWriter, r *http.Request, templateName string) {
-	full := filepath.Join("web", "templates", templateName)
-	http.ServeFile(w, r, full)
+	possiblePaths := []string{
+		filepath.Join("web", "templates", templateName),
+		filepath.Join("..", "web", "templates", templateName),
+	}
+
+	for _, path := range possiblePaths {
+		if _, err := os.Stat(path); err == nil {
+			http.ServeFile(w, r, path)
+			return
+		}
+	}
+
+	http.NotFound(w, r)
 }
 
 func handleAPIProxy(w http.ResponseWriter, r *http.Request) {
