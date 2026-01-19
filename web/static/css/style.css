@@ -313,7 +313,7 @@ body, p, li, a {
 .vinyl-grid {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(4, auto);
+    grid-template-columns: repeat(3, auto);
     gap: 20px 20px;
     align-items: start;
     justify-content: center;
