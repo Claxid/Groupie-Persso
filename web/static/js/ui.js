@@ -296,7 +296,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					audio.src = FALLBACK_PREVIEW;
 					audio.load();
 				}
-				}
 			});
 
 			const cover = document.createElement('img');
