@@ -10,11 +10,53 @@ import (
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Fatalf("panic occurred: %v", r)
+		}
+	}()
+
 	// Get port from environment or default to 8080
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
+
+	// Proxy handler to avoid CORS issues when the browser requests the external API
+	proxy := func(remote string) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			log.Printf("Proxying request to: %s", remote)
+			client := &http.Client{Timeout: 10 * time.Second}
+			resp, err := client.Get(remote)
+			if err != nil {
+				log.Printf("Error fetching %s: %v", remote, err)
+				http.Error(w, "failed to fetch remote API", http.StatusBadGateway)
+				return
+			}
+			defer resp.Body.Close()
+
+			if ct := resp.Header.Get("Content-Type"); ct != "" {
+				w.Header().Set("Content-Type", ct)
+			} else {
+				w.Header().Set("Content-Type", "application/json")
+			}
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+
+			w.WriteHeader(resp.StatusCode)
+			_, err = io.Copy(w, resp.Body)
+			if err != nil {
+				log.Printf("Error copying response body: %v", err)
+			}
+			log.Printf("Successfully proxied request to: %s", remote)
+		}
+	}
+
+	// Proxies for Groupie Trackers API to avoid CORS in the browser
+	http.HandleFunc("/api/artists-proxy", proxy("https://groupietrackers.herokuapp.com/api/artists"))
+	http.HandleFunc("/api/locations-proxy", proxy("https://groupietrackers.herokuapp.com/api/locations"))
+	http.HandleFunc("/api/dates-proxy", proxy("https://groupietrackers.herokuapp.com/api/dates"))
+	http.HandleFunc("/api/relation-proxy", proxy("https://groupietrackers.herokuapp.com/api/relation"))
+	log.Println("API proxy routes registered")
 
 	// Serve static files from a single root: web/static
 	staticDir := filepath.Join("web", "static")
@@ -74,7 +116,7 @@ func main() {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))
 	})
 
-	http.HandleFunc("/geoloc.html", func(w http.ResponseWriter, r *http.Request){
+	http.HandleFunc("/geoloc.html", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "geoloc.html"))
 	})
 
@@ -84,36 +126,4 @@ func main() {
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
-}
-
-// Note: the proxy handler is added below to avoid CORS issues when the browser
-// requests the external API. It simply relays the remote response.
-func init() {
-	proxy := func(remote string) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			client := &http.Client{Timeout: 10 * time.Second}
-			resp, err := client.Get(remote)
-			if err != nil {
-				http.Error(w, "failed to fetch remote API", http.StatusBadGateway)
-				return
-			}
-			defer resp.Body.Close()
-
-			if ct := resp.Header.Get("Content-Type"); ct != "" {
-				w.Header().Set("Content-Type", ct)
-			} else {
-				w.Header().Set("Content-Type", "application/json")
-			}
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-
-			w.WriteHeader(resp.StatusCode)
-			io.Copy(w, resp.Body)
-		}
-	}
-
-	// Proxies for Groupie Trackers API to avoid CORS in the browser
-	http.HandleFunc("/api/artists-proxy", proxy("https://groupietrackers.herokuapp.com/api/artists"))
-	http.HandleFunc("/api/locations-proxy", proxy("https://groupietrackers.herokuapp.com/api/locations"))
-	http.HandleFunc("/api/dates-proxy", proxy("https://groupietrackers.herokuapp.com/api/dates"))
-	http.HandleFunc("/api/relation-proxy", proxy("https://groupietrackers.herokuapp.com/api/relation"))
 }
