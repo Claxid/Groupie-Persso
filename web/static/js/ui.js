@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // --- Vinyls: fetch artists and bind to decorative vinyl elements ---
 document.addEventListener('DOMContentLoaded', function () {
+	console.log('🎵 ui.js: DOMContentLoaded event fired');
+	
 	const LOCAL_API = '/api/artists-proxy';
 	const REMOTE_API = 'https://groupietrackers.herokuapp.com/api/artists';
 	const LOCAL_LOCATIONS_API = '/api/locations-proxy';
@@ -64,8 +66,17 @@ document.addEventListener('DOMContentLoaded', function () {
 	const LOCAL_RELATIONS_API = '/api/relations-proxy';
 	const REMOTE_RELATIONS_API = 'https://groupietrackers.herokuapp.com/api/relation';
 	const FALLBACK_PREVIEW = 'https://samplelib.com/lib/preview/mp3/sample-3s.mp3';
+	
+	console.log('🎵 ui.js: Looking for vinyl-grid with selector: .vinyl-area .vinyl-grid');
 	const vinylGrid = document.querySelector('.vinyl-area .vinyl-grid');
-	if (!vinylGrid) return;
+	console.log('🎵 ui.js: vinylGrid found:', !!vinylGrid, vinylGrid);
+	
+	if (!vinylGrid) {
+		console.error('❌ ui.js: vinyl-grid not found, returning');
+		return;
+	}
+	
+	console.log('✅ ui.js: vinyl-grid found, starting initialization');
 
 	let locationsData = null;
 	let datesData = null;

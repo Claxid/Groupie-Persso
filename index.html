@@ -59,6 +59,11 @@
         <footer class="site-footer">
             <div class="container">© Groupie Tracker — Projet fait par Preston, Clément et Timéo</div>
         </footer>
-        <script src="/static/js/ui.js?v=20260102"></script>
+        <script>
+            console.log('Page loaded, checking vinyl grid...');
+            const vinylGrid = document.querySelector('.vinyl-area .vinyl-grid');
+            console.log('Vinyl grid found:', !!vinylGrid, vinylGrid);
+        </script>
+        <script src="/static/js/ui.js?v=20260119"></script>
     </body>
 </html>
