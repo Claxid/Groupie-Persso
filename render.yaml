@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: groupie-tracker
+    runtime: go
+    runtimeVersion: 1.21
+    buildCommand: go build -o server .
+    startCommand: ./server
+    envVars:
+      - key: PORT
+        value: 8080

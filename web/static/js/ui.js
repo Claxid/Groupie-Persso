@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // --- Vinyls: fetch artists and bind to decorative vinyl elements ---
 document.addEventListener('DOMContentLoaded', function () {
+	console.log('🎵 ui.js: DOMContentLoaded event fired');
+	
 	const LOCAL_API = '/api/artists-proxy';
 	const REMOTE_API = 'https://groupietrackers.herokuapp.com/api/artists';
 	const LOCAL_LOCATIONS_API = '/api/locations-proxy';
@@ -63,12 +65,26 @@ document.addEventListener('DOMContentLoaded', function () {
 	const REMOTE_DATES_API = 'https://groupietrackers.herokuapp.com/api/dates';
 	const LOCAL_RELATIONS_API = '/api/relations-proxy';
 	const REMOTE_RELATIONS_API = 'https://groupietrackers.herokuapp.com/api/relation';
+	const FALLBACK_PREVIEW = 'https://samplelib.com/lib/preview/mp3/sample-3s.mp3';
+	
+	console.log('🎵 ui.js: Looking for vinyl-grid with selector: .vinyl-area .vinyl-grid');
 	const vinylGrid = document.querySelector('.vinyl-area .vinyl-grid');
-	if (!vinylGrid) return;
+	console.log('🎵 ui.js: vinylGrid found:', !!vinylGrid, vinylGrid);
+	
+	if (!vinylGrid) {
+		console.error('❌ ui.js: vinyl-grid not found, returning');
+		return;
+	}
+	
+	console.log('✅ ui.js: vinyl-grid found, starting initialization');
 
 	let locationsData = null;
 	let datesData = null;
 	let relationsData = null;
+
+	// Ensure only one audio plays at a time
+	let currentAudio = null;
+	let currentFrame = null;
 
 	async function tryFetch(url) {
 		const res = await fetch(url, {cache: 'no-store'});
@@ -104,11 +120,16 @@ document.addEventListener('DOMContentLoaded', function () {
 	async function loadRelations() {
 		try {
 			relationsData = await tryFetch(LOCAL_RELATIONS_API);
+			console.log('✅ Relations loaded from local proxy');
 		} catch (err) {
+			console.warn('⚠️ Local relations API failed, trying remote...', err);
 			try {
 				relationsData = await tryFetch(REMOTE_RELATIONS_API);
+				console.log('✅ Relations loaded from remote API');
 			} catch (err2) {
-				console.warn('Failed to load relations from both proxy and remote API', err, err2);
+				console.error('❌ Failed to load relations from both APIs', err, err2);
+				// Don't fail, just continue without relations
+				relationsData = { index: [] };
 			}
 		}
 	}
@@ -132,24 +153,42 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 
 	async function loadArtists() {
-		// Load supporting data first
-		await Promise.all([loadLocations(), loadDates(), loadRelations()]);
+		// Load supporting data first, but don't block on failures
+		try {
+			await Promise.all([
+				loadLocations().catch(e => console.warn('Locations load failed:', e)),
+				loadDates().catch(e => console.warn('Dates load failed:', e)),
+				loadRelations().catch(e => console.warn('Relations load failed:', e))
+			]);
+			console.log('✅ All supplementary data loaded (or failed gracefully)');
+		} catch (err) {
+			console.warn('⚠️ Some supplementary data failed to load, continuing...', err);
+		}
 
 		let data;
 		try {
+			console.log('📡 Fetching artists from local proxy...');
 			data = await tryFetch(LOCAL_API);
+			console.log('✅ Artists loaded from local proxy');
 		} catch (err) {
+			console.warn('⚠️ Local proxy failed, trying remote API...', err);
 			// fallback to remote API if local proxy fails
 			try {
 				data = await tryFetch(REMOTE_API);
+				console.log('✅ Artists loaded from remote API');
 			} catch (err2) {
-				console.warn('Failed to load artists from both proxy and remote API', err, err2);
+				console.error('❌ Failed to load artists from both APIs', err, err2);
 				return;
 			}
 		}
 
 		const artists = Array.isArray(data) ? data : (data.artists || data);
-		if (!artists || !artists.length) return;
+		if (!artists || !artists.length) {
+			console.error('❌ No artists data found');
+			return;
+		}
+
+		console.log(`✅ Found ${artists.length} artists, creating vinyl items...`);
 
 		// clear grid first (idempotent)
 		vinylGrid.innerHTML = '';
@@ -162,6 +201,102 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			const frame = document.createElement('div');
 			frame.className = 'vinyl-frame';
+
+			// Create audio element for click-to-play music
+			const audio = document.createElement('audio');
+			audio.preload = 'auto';
+			audio.volume = 0.85;
+			audio.crossOrigin = 'anonymous';
+			audio.style.display = 'none';
+			item.appendChild(audio);
+			
+			// Track loading state
+			let audioReady = false;
+			let audioLoading = false;
+			
+			audio.addEventListener('canplaythrough', function() {
+				audioReady = true;
+				console.log('✅ Audio loaded and ready for:', a.name);
+			});
+			
+			audio.addEventListener('error', function(e) {
+				console.error('❌ Audio loading error for', a.name, ':', e);
+				audioReady = false;
+			});
+			
+			// Function to fetch music from multiple APIs
+			async function fetchMusicPreview(artistName) {
+				if (audioLoading) return null;
+				audioLoading = true;
+				
+				const encodedName = encodeURIComponent(artistName);
+				console.log('🎵 Searching music for:', artistName);
+				
+				// Try iTunes API first (30 second previews)
+				try {
+					const itunesUrl = `https://itunes.apple.com/search?term=${encodedName}&entity=song&limit=1&media=music`;
+					console.log('📡 Fetching from iTunes:', itunesUrl);
+					const itunesRes = await fetch(itunesUrl);
+					const itunesData = await itunesRes.json();
+					console.log('📦 iTunes response:', itunesData);
+					
+					if (itunesData.results && itunesData.results.length > 0) {
+						let preview = itunesData.results[0].previewUrl;
+						if (preview) {
+							if (preview.startsWith('http://')) {
+								preview = preview.replace('http://', 'https://');
+							}
+							console.log('✅ iTunes preview found:', preview);
+							audioLoading = false;
+							return preview;
+						}
+					}
+					console.log('⚠️ No iTunes results for:', artistName);
+				} catch (err) {
+					console.error('❌ iTunes API error:', err);
+				}
+				
+				// Try Deezer API as fallback
+				try {
+					const deezerUrl = `https://api.deezer.com/search?q=${encodedName}&limit=1`;
+					console.log('📡 Fetching from Deezer:', deezerUrl);
+					const deezerRes = await fetch(deezerUrl);
+					const deezerData = await deezerRes.json();
+					console.log('📦 Deezer response:', deezerData);
+					
+					if (deezerData.data && deezerData.data.length > 0) {
+						let preview = deezerData.data[0].preview;
+						if (preview) {
+							if (preview.startsWith('http://')) {
+								preview = preview.replace('http://', 'https://');
+							}
+							console.log('✅ Deezer preview found:', preview);
+							audioLoading = false;
+							return preview;
+						}
+					}
+					console.log('⚠️ No Deezer results for:', artistName);
+				} catch (err) {
+					console.error('❌ Deezer API error:', err);
+				}
+				
+				console.warn('❌ No preview found for:', artistName);
+				audioLoading = false;
+				return null;
+			}
+			
+			// Fetch and set audio source immediately
+			fetchMusicPreview(a.name || '').then(previewUrl => {
+				if (previewUrl) {
+					console.log('🔗 Setting audio src:', previewUrl);
+					audio.src = previewUrl;
+					audio.load();
+				} else {
+					console.warn('⚠️ No audio preview found, using fallback for:', a.name);
+					audio.src = FALLBACK_PREVIEW;
+					audio.load();
+				}
+			});
 
 			const cover = document.createElement('img');
 			cover.className = 'vinyl-cover';
@@ -177,9 +312,107 @@ document.addEventListener('DOMContentLoaded', function () {
 			caption.textContent = a.name || '';
 			item.appendChild(caption);
 
-			// clicking the vinyl opens the artist modal
+			// Toggle play/pause music on click
+			let isPlaying = false;
+			let playAttempted = false;
+			
 			frame.style.cursor = 'pointer';
-			frame.addEventListener('click', function () {
+			frame.addEventListener('click', function (e) {
+				console.log('🖱️ Vinyl clicked for:', a.name, 'Audio src:', audio.src, 'Ready:', audioReady);
+				
+				// If no audio source yet, fetch it now
+				if (!audio.src) {
+					console.log('⏳ No audio source, fetching now...');
+					fetchMusicPreview(a.name || '').then(previewUrl => {
+						if (previewUrl) {
+							audio.src = previewUrl;
+							audio.load();
+							// Wait a bit for metadata to load, then try to play
+							setTimeout(() => {
+								console.log('🔄 Retrying play after fetch...');
+								frame.click();
+							}, 500);
+						} else {
+							console.error('❌ Failed to fetch preview for:', a.name);
+							alert('Désolé, aucune musique disponible pour ' + a.name);
+						}
+					});
+					return;
+				}
+				
+				if (!isPlaying && !playAttempted) {
+					playAttempted = true;
+					console.log('▶️ Attempting to play audio for:', a.name);
+					console.log('🔊 Audio element state:', {
+						src: audio.src,
+						readyState: audio.readyState,
+						paused: audio.paused,
+						volume: audio.volume,
+						duration: audio.duration
+					});
+
+					// Stop any previously playing audio
+					if (currentAudio && currentAudio !== audio) {
+						try { 
+							currentAudio.pause(); 
+							currentAudio.currentTime = 0;
+							console.log('⏹️ Stopped previous audio');
+						} catch(_){}
+						if (currentFrame) { currentFrame.classList.remove('playing'); }
+					}
+					
+					const playPromise = audio.play();
+					if (playPromise !== undefined) {
+						playPromise
+							.then(() => {
+								isPlaying = true;
+								playAttempted = false;
+								frame.classList.add('playing');
+								currentAudio = audio;
+								currentFrame = frame;
+								console.log('✅ Audio playing successfully for:', a.name);
+							})
+							.catch(err => {
+								playAttempted = false;
+								console.error('❌ Audio play failed for', a.name);
+								console.error('Error details:', err);
+								console.error('Audio state:', {
+									src: audio.src,
+									readyState: audio.readyState,
+									networkState: audio.networkState,
+									error: audio.error
+								});
+								// try fallback once if not already on fallback
+								if (audio.src !== FALLBACK_PREVIEW) {
+									console.warn('⚠️ Retrying with fallback audio for:', a.name);
+									audio.src = FALLBACK_PREVIEW;
+									audio.load();
+									setTimeout(() => frame.click(), 300);
+								} else {
+									alert('Erreur de lecture audio: ' + err.message);
+								}
+							});
+					}
+				} else if (isPlaying) {
+					console.log('⏹️ Stopping audio for:', a.name);
+					audio.pause();
+					audio.currentTime = 0;
+					isPlaying = false;
+					frame.classList.remove('playing');
+					playAttempted = false;
+					if (currentAudio === audio) { currentAudio = null; currentFrame = null; }
+				}
+			});
+			
+			// Double-click to open artist modal
+			frame.addEventListener('dblclick', function () {
+				// Stop music if playing
+				if (isPlaying) {
+					audio.pause();
+					audio.currentTime = 0;
+					isPlaying = false;
+					frame.classList.remove('playing');
+				}
 				openArtistModal(a);
 			});
 
