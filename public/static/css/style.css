@@ -108,7 +108,6 @@ body {
     background: rgba(255,255,255,0.06);
     color: #fff;
     border-color: rgba(255,255,255,0.08);
-    transform: translateY(-1px);
 }
 
 .menu-toggle {
@@ -158,7 +157,7 @@ body {
 }
 
 .header-search-btn:hover {
-    transform: translateY(-1px) scale(1.01);
+
     box-shadow: 0 14px 40px rgba(123,58,237,0.45);
 }
 
