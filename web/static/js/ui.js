@@ -175,6 +175,12 @@ document.addEventListener('DOMContentLoaded', function () {
 	// URL directe de l'API Groupie Trackers pour les relations (fallback)
 	// Note: l'API utilise '/relation' (singulier) au lieu de '/relations'
 	const REMOTE_RELATIONS_API = 'https://groupietrackers.herokuapp.com/api/relation';
+
+	// Jeu de données minimal de secours si les APIs échouent
+	const SAMPLE_ARTISTS = [
+		{ id: 0, name: 'Artist Demo 1', image: '/static/images/vinyle.png', members: [], creationDate: 2000 },
+		{ id: 1, name: 'Artist Demo 2', image: '/static/images/vinyle.png', members: [], creationDate: 2005 }
+	];
 	
 	// MP3 de secours (3 secondes) utilisé si iTunes et Deezer échouent
 	// Permet de toujours avoir un audio jouable même sans aperçu musical trouvé
@@ -434,7 +440,8 @@ document.addEventListener('DOMContentLoaded', function () {
 				// Si les deux sources échouent, abandonner complètement
 				// L'application ne peut pas fonctionner sans données d'artistes
 				console.error('❌ Failed to load artists from both APIs', err, err2);
-				return; // sortir de loadArtists() sans rien afficher
+				// Utiliser le fallback local minimal pour afficher au moins 2 vinyles
+				data = SAMPLE_ARTISTS;
 			}
 		}
 
