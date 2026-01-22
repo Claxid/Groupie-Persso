@@ -1,8 +1,6 @@
-// Package main: serveur HTTP ultra-compact (3 lignes)
-// Toute la logique métier est déléguée à database.go, auth.go, routes.go
+// Package main: serveur HTTP ultra-compact | Logique métier en database.go, auth.go, routes.go
 package main
 
-// Imports: database/sql (MySQL), log (logs), net/http (serveur), os (env vars)
 import (
 	"database/sql"
 	"log"
@@ -10,11 +8,7 @@ import (
 	"os"
 )
 
-// func main: point d'entrée de l'application
-// - defer recover(): capture les paniques Go non gérées
-// - InitDB(): initialise la connexion MySQL (optionnelle via DISABLE_DB=1)
-// - SetupRoutes(db): configure toutes les routes HTTP (/, /search, /login, /api/*, etc)
-// - http.ListenAndServe(): démarre le serveur HTTP sur le port (défaut 8080)
+// defer recover: capture paniques | InitDB: connexion MySQL | SetupRoutes: routes HTTP | ListenAndServe: serveur
 func main() {
 	defer func() {
 		if r := recover(); r != nil {
