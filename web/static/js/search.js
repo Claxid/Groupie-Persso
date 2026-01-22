@@ -8,6 +8,113 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	let allArtists = [];
 	let activeFilter = null;
+	let modalEl = null;
+	let modalBackdrop = null;
+
+	function ensureModal() {
+		if (modalEl) return;
+		modalBackdrop = document.createElement('div');
+		modalBackdrop.className = 'search-modal-backdrop';
+		modalEl = document.createElement('div');
+		modalEl.className = 'search-modal';
+
+		const closeBtn = document.createElement('button');
+		closeBtn.className = 'search-modal__close';
+		closeBtn.textContent = '×';
+		closeBtn.addEventListener('click', hideModal);
+
+		const content = document.createElement('div');
+		content.className = 'search-modal__content';
+		modalEl.appendChild(closeBtn);
+		modalEl.appendChild(content);
+
+		modalBackdrop.appendChild(modalEl);
+		document.body.appendChild(modalBackdrop);
+
+		modalBackdrop.addEventListener('click', (e) => {
+			if (e.target === modalBackdrop) hideModal();
+		});
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') hideModal();
+		});
+	}
+
+	function hideModal() {
+		if (modalBackdrop) modalBackdrop.classList.remove('open');
+	}
+
+	function renderModalContent(artist) {
+		if (!modalEl) return;
+		const content = modalEl.querySelector('.search-modal__content');
+		if (!content) return;
+		content.innerHTML = '';
+
+		const header = document.createElement('div');
+		header.className = 'search-modal__header';
+		const h2 = document.createElement('h2');
+		h2.textContent = artist.name || 'Artiste';
+		header.appendChild(h2);
+
+		if (artist.creationDate || artist.firstAlbum) {
+			const meta = document.createElement('p');
+			meta.className = 'search-modal__meta';
+			const creation = artist.creationDate ? `Création: ${artist.creationDate}` : '';
+			const album = artist.firstAlbum ? `Premier album: ${artist.firstAlbum}` : '';
+			meta.textContent = [creation, album].filter(Boolean).join(' — ');
+			header.appendChild(meta);
+		}
+
+		if (artist.image) {
+			const imgWrap = document.createElement('div');
+			imgWrap.className = 'search-modal__media';
+			const img = document.createElement('img');
+			img.src = artist.image;
+			img.alt = artist.name || '';
+			img.loading = 'lazy';
+			imgWrap.appendChild(img);
+			content.appendChild(imgWrap);
+		}
+
+		content.appendChild(header);
+
+		const members = Array.isArray(artist.members) ? artist.members : [];
+		const info = document.createElement('div');
+		info.className = 'search-modal__info';
+		if (members.length) {
+			const title = document.createElement('h3');
+			title.textContent = 'Membres';
+			info.appendChild(title);
+			const ul = document.createElement('ul');
+			ul.className = 'search-modal__list';
+			members.forEach(m => {
+				const li = document.createElement('li');
+				li.textContent = m;
+				ul.appendChild(li);
+			});
+			info.appendChild(ul);
+		}
+
+		content.appendChild(info);
+
+		const links = document.createElement('div');
+		links.className = 'search-modal__links';
+		const official = artist.url || artist.website || artist.link;
+		if (official) {
+			const a = document.createElement('a');
+			a.href = official;
+			a.target = '_blank';
+			a.rel = 'noopener noreferrer';
+			a.textContent = 'Ouvrir le site officiel';
+			links.appendChild(a);
+		}
+		content.appendChild(links);
+	}
+
+	function showModal(artist) {
+		ensureModal();
+		renderModalContent(artist);
+		if (modalBackdrop) modalBackdrop.classList.add('open');
+	}
 
 	async function ensureData() {
 		if (allArtists.length) return allArtists;
@@ -52,6 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		list.forEach((artist, idx) => {
 			const card = document.createElement('article');
 			card.className = 'artist-card';
+			card.tabIndex = 0;
+			card.setAttribute('role','button');
 
 			const imageUrl = artist.image || artist.imageUrl || artist.picture || artist.photo || artist.thumbnail || artist.img || artist.thumb || artist.image_url || artist.photo_url || artist.avatar;
 			if (imageUrl) {
@@ -102,6 +211,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			card.appendChild(body);
 			results.appendChild(card);
+
+			card.addEventListener('click', () => showModal(artist));
+			card.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					showModal(artist);
+				}
+			});
 
 			// micro fade-in
 			requestAnimationFrame(() => {
