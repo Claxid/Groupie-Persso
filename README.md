@@ -1,201 +1,148 @@
 # Groupie-Persso
 
-Application web musicale en Go (backend) + HTML/CSS/JS (frontend) pour explorer les artistes, leurs locations et dates de concerts.
+Application web musicale en Go (backend) + HTML/CSS/JS (frontend).
 
-## Demarrage rapide
+## Installation rapide
 
-### Prerequis
-- Go 1.21+
-- MySQL 5.7+ (optionnel)
-
-### Installation
 ```
 git clone https://github.com/Claxid/Groupie-Persso.git
 cd Groupie-Persso
 go mod download
-```
-
-### Execution locale
-```
-# Avec base de donnees
 go build -o groupie-tracker.exe main.go database.go auth.go routes.go
 ./groupie-tracker.exe
-
-# Sans base de donnees
-DISABLE_DB=1 ./groupie-tracker.exe
 ```
-
-## Structure du projet
-
-- main.go (32 lignes) - Point d'entree ultra-compact
-- database.go - Gestion MySQL avec pooling
-- auth.go - Authentification utilisateur avec bcrypt
-- routes.go - Configuration routes HTTP et proxies API
-- web/ - Frontend (templates HTML, CSS, JS)
 
 ## Configuration
 
-Variables d'environnement:
-- PORT (defaut 8080) - Port d'ecoute
-- DISABLE_DB (defaut 0) - Desactiver MySQL = 1
-- DB_USER (defaut root) - Utilisateur MySQL
-- DB_PASS (defaut root) - Mot de passe MySQL
-- DB_HOST (defaut localhost) - Hote MySQL
-- DB_PORT (defaut 3306) - Port MySQL
-- DB_NAME (defaut groupie) - Base de donnees
-
-## Routes principales
-
-- / (GET) - Page d'accueil
-- /search (GET) - Recherche d'artistes
-- /filters (GET) - Filtrage avance
-- /geoloc (GET) - Localisation geographique
-- /login (GET/POST) - Authentification
-- /api/artists-proxy (GET) - Proxy API Artists
-- /api/locations-proxy (GET) - Proxy API Locations
-- /api/dates-proxy (GET) - Proxy API Dates
-- /api/relation-proxy (GET) - Proxy API Relations
-- /static/* (GET) - Fichiers statiques
+Variables d'environnement: PORT (8080), DISABLE_DB (0), DB_USER, DB_PASS, DB_HOST, DB_PORT, DB_NAME
 
 ## Description des fonctions
 
 ### main.go
 
-func main()
-- Point d'entree de l'application
-- Gere les paniques Go avec defer recover()
-- Initialise la connexion MySQL (optionnelle)
-- Configure les routes HTTP
-- Demarrage serveur HTTP sur le port
+func main() - Point d'entree, gestion paniques, init DB conditionnelle, setup routes, demarrage serveur
+
+Lignes importantes:
+- defer func() { if r := recover(); r != nil { log.Fatalf(...) } }() 
+  Capture les paniques Go non gerees
+- if os.Getenv("DISABLE_DB") != "1" { if c,e := InitDB(); ... }
+  Connexion DB optionnelle (peut desactiver avec DISABLE_DB=1)
+- log.Fatal(http.ListenAndServe(":"+p, nil))
+  Demarre serveur HTTP, Fatal = arrete l'app en cas d'erreur
 
 ---
 
 ### database.go
 
-func InitDB() (*sql.DB, error)
-- Etablit la connexion a MySQL
-- Configure DSN avec charset utf8mb4
-- Pool: 10 connexions max ouvertes, 5 inactives
-- Timeout connexion: 30 minutes
-- Valide connexion avec Ping()
-- Retourne: pointeur *sql.DB ou erreur
+func InitDB() - Etablit connexion MySQL avec pooling, charset utf8mb4, timeout 30min
 
-func getenvDefault(key, def string) string
-- Lit une variable d'environnement
-- Retourne valeur par defaut si vide
-- Utilisee pour tous les parametres DB
+Lignes importantes:
+- dsn := mysql.Config{User: getenvDefault("DB_USER", "root"), ...}
+  Configuration DSN avec parametres MySQL depuis variables environnement
+- database.SetMaxOpenConns(10) / SetMaxIdleConns(5)
+  Limite: 10 connexions max ouvertes, 5 inactives gardees en reserve
+- database.SetConnMaxLifetime(30 * time.Minute)
+  Ferme connexions apres 30 minutes (evite problemes serveur MySQL)
+- if err := database.Ping(); err != nil { return nil, err }
+  Valide que connexion fonctionne avant de la retourner
+
+func getenvDefault(key, def string) - Lit variable environnement, retourne valeur par defaut si vide
+
+Lignes importantes:
+- if v := os.Getenv(key); v != "" { return v }
+  Teste si variable existe et n'est pas vide
+- return def
+  Retourne valeur par defaut si variable non trouvee
 
 ---
 
 ### auth.go
 
-type User struct
-- Nom (string) - Nom de famille
-- Prenom (string) - Prenom
-- Sexe (string) - M, F, Autre
-- Password (string) - Mot de passe (hashe en DB)
+type User - Struct avec Nom, Prenom, Sexe, Password (pour JSON parsing)
 
-func HandleRegister(db *sql.DB) http.HandlerFunc
-- Cree un nouvel utilisateur
-- Recut: POST JSON {nom, prenom, sexe, password}
-- Validation: tous champs requis, password >= 6 caracteres
-- Hash mot de passe en bcrypt
-- Stocke en base de donnees
-- Retourne: 201 Created + ID utilisateur
+func HandleRegister(db *sql.DB) - Cree nouvel utilisateur, validation, bcrypt hash, insert DB
 
-func HandleLogin(db *sql.DB) http.HandlerFunc
-- Authentifie un utilisateur
-- Recut: POST JSON {id_utilisateur, password}
-- Verifie: ID existe et mot de passe correct
-- Compare avec bcrypt
-- Retourne: 200 OK + infos utilisateur ou 401 Unauthorized
+Lignes importantes:
+- if req.Nom == "" || req.Prenom == "" || ... || len(req.Password) < 6
+  Validation stricte: tous champs requis, password minimum 6 caracteres
+- hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+  Hash mot de passe avec bcrypt (jamais stocke en clair)
+- result, err := db.Exec(query, req.Nom, req.Prenom, req.Sexe, string(hash))
+  Insert utilisateur en DB avec mot de passe hashe
+- id, _ := result.LastInsertId()
+  Recupere ID auto-increment de l'utilisateur cree
 
-func writeJSON(w http.ResponseWriter, status int, data any)
-- Helper pour repondre en JSON
-- Definit headers: Content-Type application/json
-- Definit status HTTP
-- Encode data en JSON dans reponse
-- Utilisee par tous endpoints auth
+func HandleLogin(db *sql.DB) - Authentifie utilisateur, verifie credentials avec bcrypt
+
+Lignes importantes:
+- var req struct { IDUser int; Password string }
+  Decode JSON avec ID utilisateur et mot de passe
+- row := db.QueryRow("SELECT `password`, ... FROM `user` WHERE `id_user` = ?", req.IDUser)
+  Requete parametrisee pour recuperer hash stocke (previent SQL injection)
+- if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(req.Password)); err != nil
+  Compare mot de passe fourni avec hash stocke (seule facon de verifier)
+
+func writeJSON(w, status, payload) - Helper repondre en JSON avec status HTTP
+
+Lignes importantes:
+- w.Header().Set("Content-Type", "application/json")
+  Define header HTTP pour indiquer JSON
+- w.WriteHeader(status)
+  Envoie code status HTTP (201, 401, 200, etc)
+- json.NewEncoder(w).Encode(payload)
+  Encode et ecrit payload en JSON dans reponse
 
 ---
 
 ### routes.go
 
-func SetupRoutes(db *sql.DB)
-- Configure tous les handlers HTTP
-- Enregistre proxies API Groupie Trackers (4 routes)
-- Configure fichiers statiques (/static/*)
-- Enregistre routes templates (/, /search, /login, etc)
-- Enregistre endpoints auth (/api/register, /api/login)
+func SetupRoutes(db) - Configure 4 proxies API, fichiers statiques, templates, endpoints auth
 
-func CreateProxy(remote string) http.HandlerFunc
-- Factory function creant un proxy HTTP
-- Parametre: URL distante a proxifier
-- Effectue requete GET vers l'API distante (timeout 10s)
-- Copie headers reponse (Content-Type)
-- Forward le contenu au client
-- Gere erreurs reseau (502 Bad Gateway)
+Lignes importantes:
+- http.HandleFunc("/api/artists-proxy", CreateProxy("https://groupietrackers.herokuapp.com/api/artists"))
+  Enregistre route proxy pour chaque endpoint Groupie Trackers (4 routes)
+- http.HandleFunc("/static/", ServeStatic(staticDir))
+  Configure serveur fichiers statiques avec detection MIME type
+- for _, rt := range routes { http.HandleFunc(rlocal, serveIndex) }
+  Boucle pour enregistrer plusieurs routes avec meme handler
 
-func ServeStatic(staticDir string) http.HandlerFunc
-- Sert les fichiers statiques (CSS, JS, images)
-- Detecte MIME type automatiquement
-- Ajoute Cache-Control: public, max-age=3600 (1h)
-- Gere les routes /static/* correctement
-- Retourne 404 si fichier non trouve
+func CreateProxy(remote string) - Factory proxy HTTP, requete GET distant (timeout 10s), forward reponse
+
+Lignes importantes:
+- client := &http.Client{Timeout: 10 * time.Second}
+  Client HTTP avec timeout 10s (evite attente infinie)
+- resp, err := client.Get(remote)
+  Effectue requete GET vers API distante
+- if ct := resp.Header.Get("Content-Type"); ct != "" { w.Header().Set("Content-Type", ct) }
+  Copie Content-Type de l'API distant (JSON, etc)
+- io.Copy(w, resp.Body)
+  Forward contenu entier de reponse au client (efficace, ne charge pas en memoire)
+
+func ServeStatic(staticDir string) - Sert fichiers statiques, detecte MIME type, cache 1 an
+
+Lignes importantes:
+- reqPath := r.URL.Path[len("/static/"):] / full := filepath.Join(staticDir, ...)
+  Extrait chemin du fichier et construit chemin absolu securise
+- switch ext { case ".css": w.Header().Set("Content-Type", "text/css") }
+  Detecte extension et definit Content-Type correct
+- w.Header().Set("Cache-Control", "public, max-age=31536000")
+  Cache agressif 1 an (31536000 secondes) pour performance
+- http.NotFound(w, r)
+  Retourne 404 si fichier n'existe pas
 
 ---
 
-## Exemples d'utilisation
+## Routes principales
 
-### Creer un utilisateur
-```
-POST /api/register
-Content-Type: application/json
-
-{
-  "nom": "Dupont",
-  "prenom": "Jean",
-  "sexe": "M",
-  "password": "MDP123456"
-}
-
-Reponse: {"message":"user created","id_utilisateur":1}
-```
-
-### Se connecter
-```
-POST /api/login
-Content-Type: application/json
-
-{
-  "id_utilisateur": 1,
-  "password": "MDP123456"
-}
-
-Reponse: {"message":"logged in","nom":"Dupont","prenom":"Jean","sexe":"M"}
-```
-
-### Recuperer les artistes (proxy)
-```
-GET /api/artists-proxy
-Reponse: JSON de l'API Groupie Trackers
-```
-
-## Dependencies
-
-github.com/go-sql-driver/mysql v1.9.3 - Driver MySQL
-golang.org/x/crypto v0.47.0 - Bcrypt pour mots de passe
+/ - Page accueil | /search, /filters - Pages templates | /login - Auth
+/api/artists-proxy, /locations-proxy, /dates-proxy, /relation-proxy - Groupie API
+/api/register, /api/login - Endpoints auth
+/static/* - Fichiers CSS, JS, images
 
 ## Build
 
-```
 go build -o groupie-tracker.exe main.go database.go auth.go routes.go
-```
 
 ## Licence
 
-Projet personnel. Libre d'utilisation.
-
----
-
-Derniere mise a jour: Janvier 2026
+Libre d'utilisation.
