@@ -31,12 +31,18 @@ func main() {
 		}
 	}()
 
-	var err error
-	db, err = initDB()
-	if err != nil {
-		log.Fatalf("failed to init DB: %v", err)
+	if os.Getenv("DISABLE_DB") != "1" {
+		var err error
+		db, err = initDB()
+		if err != nil {
+			log.Printf("DB disabled (init failed): %v", err)
+			db = nil
+		} else {
+			log.Println("DB connection established")
+		}
+	} else {
+		log.Println("DB disabled via DISABLE_DB=1")
 	}
-	log.Println("DB connection established")
 
 	// Get port from environment or default to 8080
 	port := os.Getenv("PORT")
@@ -217,6 +223,10 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
 		return
 	}
+	if db == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "database unavailable"})
+		return
+	}
 
 	var req user
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -252,6 +262,10 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 func handleLogin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
+		return
+	}
+	if db == nil {
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "database unavailable"})
 		return
 	}
 
