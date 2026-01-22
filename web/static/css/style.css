@@ -268,12 +268,8 @@ body, p, li, a{color:var(--muted-strong)}
     justify-content:flex-start;
     gap:15px;
     width:100%;
-    opacity:0;
-}
-
-.vinyl-item.fade-in{
-    animation:fadeUp 0.7s ease forwards !important;
-    opacity:1 !important;
+    opacity:1;
+    animation:fadeUp 0.7s ease forwards;
 }
     width:380px;
     height:380px;
