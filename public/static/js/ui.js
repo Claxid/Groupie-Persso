@@ -55,6 +55,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // --- Vinyls: fetch artists and bind to decorative vinyl elements ---
 document.addEventListener('DOMContentLoaded', function () {
+	console.log('🎵 ui.js: DOMContentLoaded event fired');
+	
 	const LOCAL_API = '/api/artists-proxy';
 	const REMOTE_API = 'https://groupietrackers.herokuapp.com/api/artists';
 	const LOCAL_LOCATIONS_API = '/api/locations-proxy';
@@ -64,8 +66,17 @@ document.addEventListener('DOMContentLoaded', function () {
 	const LOCAL_RELATIONS_API = '/api/relations-proxy';
 	const REMOTE_RELATIONS_API = 'https://groupietrackers.herokuapp.com/api/relation';
 	const FALLBACK_PREVIEW = 'https://samplelib.com/lib/preview/mp3/sample-3s.mp3';
+	
+	console.log('🎵 ui.js: Looking for vinyl-grid with selector: .vinyl-area .vinyl-grid');
 	const vinylGrid = document.querySelector('.vinyl-area .vinyl-grid');
-	if (!vinylGrid) return;
+	console.log('🎵 ui.js: vinylGrid found:', !!vinylGrid, vinylGrid);
+	
+	if (!vinylGrid) {
+		console.error('❌ ui.js: vinyl-grid not found, returning');
+		return;
+	}
+	
+	console.log('✅ ui.js: vinyl-grid found, starting initialization');
 
 	let locationsData = null;
 	let datesData = null;
@@ -285,7 +296,6 @@ document.addEventListener('DOMContentLoaded', function () {
 					audio.src = FALLBACK_PREVIEW;
 					audio.load();
 				}
-				}
 			});
 
 			const cover = document.createElement('img');
@@ -302,13 +312,16 @@ document.addEventListener('DOMContentLoaded', function () {
 			caption.textContent = a.name || '';
 			item.appendChild(caption);
 
-			// Toggle play/pause music on click
+			// Play music on hover after 2.5 seconds
 			let isPlaying = false;
 			let playAttempted = false;
+			let hoverTimeout = null;
 			
 			frame.style.cursor = 'pointer';
-			frame.addEventListener('click', function (e) {
-				console.log('🖱️ Vinyl clicked for:', a.name, 'Audio src:', audio.src, 'Ready:', audioReady);
+			
+			// Function to attempt playing the audio
+			function tryPlayAudio() {
+				console.log('🖱️ Attempting to play audio for:', a.name, 'Audio src:', audio.src, 'Ready:', audioReady);
 				
 				// If no audio source yet, fetch it now
 				if (!audio.src) {
@@ -320,11 +333,10 @@ document.addEventListener('DOMContentLoaded', function () {
 							// Wait a bit for metadata to load, then try to play
 							setTimeout(() => {
 								console.log('🔄 Retrying play after fetch...');
-								frame.click();
+								tryPlayAudio();
 							}, 500);
 						} else {
 							console.error('❌ Failed to fetch preview for:', a.name);
-							alert('Désolé, aucune musique disponible pour ' + a.name);
 						}
 					});
 					return;
@@ -377,31 +389,49 @@ document.addEventListener('DOMContentLoaded', function () {
 									console.warn('⚠️ Retrying with fallback audio for:', a.name);
 									audio.src = FALLBACK_PREVIEW;
 									audio.load();
-									setTimeout(() => frame.click(), 300);
-								} else {
-									alert('Erreur de lecture audio: ' + err.message);
+									setTimeout(() => tryPlayAudio(), 300);
 								}
 							});
 					}
-				} else if (isPlaying) {
-					console.log('⏹️ Stopping audio for:', a.name);
-					audio.pause();
-					audio.currentTime = 0;
-					isPlaying = false;
-					frame.classList.remove('playing');
-					playAttempted = false;
-					if (currentAudio === audio) { currentAudio = null; currentFrame = null; }
+				}
+			}
+			
+			// Start timer on mouseenter
+			frame.addEventListener('mouseenter', function () {
+				console.log('🖱️ Mouse entered vinyl for:', a.name);
+				hoverTimeout = setTimeout(() => {
+					console.log('⏰ 2.5s hover elapsed, playing audio for:', a.name);
+					tryPlayAudio();
+				}, 2500); // 2.5 seconds
+			});
+			
+			// Cancel timer on mouseleave
+			frame.addEventListener('mouseleave', function () {
+				console.log('🖱️ Mouse left vinyl for:', a.name);
+				if (hoverTimeout) {
+					clearTimeout(hoverTimeout);
+					hoverTimeout = null;
 				}
 			});
 			
-			// Double-click to open artist modal
-			frame.addEventListener('dblclick', function () {
+			// Click to open artist modal
+			frame.addEventListener('click', function () {
+				console.log('🖱️ Vinyl clicked for:', a.name);
 				// Stop music if playing
 				if (isPlaying) {
 					audio.pause();
 					audio.currentTime = 0;
 					isPlaying = false;
 					frame.classList.remove('playing');
+					if (currentAudio === audio) { 
+						currentAudio = null; 
+						currentFrame = null; 
+					}
+				}
+				// Cancel hover timer if active
+				if (hoverTimeout) {
+					clearTimeout(hoverTimeout);
+					hoverTimeout = null;
 				}
 				openArtistModal(a);
 			});

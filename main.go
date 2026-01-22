@@ -111,6 +111,11 @@ func main() {
 		http.HandleFunc(rlocal, serveIndex)
 	}
 
+	// Redirect /geoloc to /geoloc.html
+	http.HandleFunc("/geoloc", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/geoloc.html", http.StatusMovedPermanently)
+	})
+
 	// Serve specific template HTML files from `web/templates/` when requested
 	http.HandleFunc("/search.html", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))
