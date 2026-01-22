@@ -143,6 +143,7 @@ body{
     overflow:hidden;
     display:flex;
     flex-direction:column;
+    cursor:pointer;
     box-shadow:0 14px 40px rgba(0,0,0,0.35);
     border:1px solid var(--glass-border);
     opacity:0;
