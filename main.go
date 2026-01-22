@@ -1,25 +1,72 @@
 package main
 
 import (
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-
-	"groupiepersso/internal/database"
-	"groupiepersso/internal/handlers"
 )
 
+// proxyAPI fait un proxy HTTP simple vers une URL cible
+func proxyAPI(targetURL string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Créer une requête GET vers l'API distante
+		resp, err := http.Get(targetURL)
+		if err != nil {
+			http.Error(w, "API unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		defer resp.Body.Close()
+
+		// Copier les headers de la réponse API
+		for key, values := range resp.Header {
+			for _, value := range values {
+				w.Header().Add(key, value)
+			}
+		}
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
+
+		// Copier le statut et le body
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+	}
+}
+
 func main() {
-	handlers.DB, _ = database.InitDB()
-	handlers.SetupStaticRoutes(filepath.Join("web", "static"))
-	handlers.SetupTemplateRoutes()
-	http.HandleFunc("/api/artists-proxy", handlers.ProxyHandler("https://groupietrackers.herokuapp.com/api/artists"))
-	http.HandleFunc("/api/locations-proxy", handlers.ProxyHandler("https://groupietrackers.herokuapp.com/api/locations"))
-	http.HandleFunc("/api/dates-proxy", handlers.ProxyHandler("https://groupietrackers.herokuapp.com/api/dates"))
-	http.HandleFunc("/api/relation-proxy", handlers.ProxyHandler("https://groupietrackers.herokuapp.com/api/relation"))
-	http.HandleFunc("/api/register", handlers.HandleRegister)
-	http.HandleFunc("/api/login", handlers.HandleLogin)
+	// Route pour les fichiers statiques
+	fs := http.FileServer(http.Dir(filepath.Join("web", "static")))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	// Routes pour les templates
+	http.HandleFunc("/search.html", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))
+	})
+
+	http.HandleFunc("/geoloc.html", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "geoloc.html"))
+	})
+
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "login.html"))
+	})
+
+	// Routes API avec proxy
+	http.HandleFunc("/api/artists-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/artists"))
+	http.HandleFunc("/api/locations-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/locations"))
+	http.HandleFunc("/api/dates-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/dates"))
+	http.HandleFunc("/api/relation-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/relation"))
+
+	// Route racine pour index.html
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		http.ServeFile(w, r, "index.html")
+	})
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
