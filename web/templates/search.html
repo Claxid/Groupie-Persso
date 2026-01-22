@@ -3,27 +3,37 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Recherche d'artistes</title>
+	<title>Recherche d'artistes — Groupie Tracker</title>
+	<meta name="description" content="Recherchez et trouvez vos artistes préférés sur Groupie Tracker.">
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/static/css/style.css">
 	<link rel="stylesheet" href="/static/css/search.css">
 	<meta name="robots" content="noindex">
 </head>
 <body>
 	<header class="site-header">
-		<div class="container">
-			<h1>Recherche d'artistes</h1>
-			<nav class="main-nav" aria-label="Navigation principale">
+		<div class="header-content">
+			<h1>Groupie Tracker</h1>
+			<form class="header-search-form" action="/search.html" method="get">
+				<input type="search" name="q" placeholder="Rechercher un artiste..." aria-label="Recherche" class="header-search-input">
+				<button type="submit" class="btn header-search-btn">Recherche</button>
+			</form>
+			<nav class="main-nav" id="mainNav">
 				<a href="/">Accueil</a>
+				<a href="/filters">Filtres</a>
 				<a href="/geoloc.html">Géolocalisation</a>
 			</nav>
-			<div class="header-actions">
-				<a href="/" class="back-btn" onclick="history.back(); return false;">Retour</a>
-				<noscript><a href="/" class="back-btn">Retour</a></noscript>
-			</div>
+			<button class="btn btn-subscribe" id="subscribeBtn">S'abonner</button>
 		</div>
 	</header>
 
 	<main class="container">
+		<section class="page-title">
+			<h2>Recherche d'artistes</h2>
+			<p>Trouvez vos groupes préférés et découvrez leurs dates de concerts</p>
+		</section>
+
 		<form id="searchForm" class="search-form">
 			<label for="query">Nom de l'artiste :</label>
 			<div class="input-stack">
@@ -47,6 +57,20 @@
 		</section>
 	</main>
 
+	<footer class="site-footer">
+		<div class="container footer-content">
+			<div class="footer-info">
+				<p>&copy; 2026 Groupie Tracker — Projet fait par Preston, Clément et Timéo</p>
+			</div>
+			<div class="footer-links">
+				<a href="/search.html">Rechercher</a>
+				<a href="/filters">Filtres</a>
+				<a href="/geoloc.html">Géolocalisation</a>
+			</div>
+		</div>
+	</footer>
+
+	<script src="/static/js/ui.js"></script>
 	<script src="/static/js/search.js"></script>
 </body>
 </html>

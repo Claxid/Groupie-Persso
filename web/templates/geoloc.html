@@ -1,51 +1,71 @@
 
 <!DOCTYPE html>
 <html lang="fr">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Géolocalisation — Groupie Tracker</title>
-		<link rel="stylesheet" href="/static/css/style.css" />
-		<link rel="stylesheet" href="/static/css/geoloc.css" />
-		<!-- Leaflet CSS -->
-		<link
-			rel="stylesheet"
-			href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-			crossorigin="anonymous"
-		/>
-	</head>
-	<body>
-		<header class="site-header">
-			<div class="container">
-				<h1>Géolocalisation des Groupes</h1>
-				<nav class="main-nav" id="mainNav">
-					<a href="/">Accueil</a>
-					<a href="/search.html">Recherche</a>
-				</nav>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Géolocalisation — Groupie Tracker</title>
+	<meta name="description" content="Découvrez où jouent vos artistes préférés en temps réel sur notre carte interactive." />
+	<!-- Fonts -->
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/static/css/style.css" />
+	<link rel="stylesheet" href="/static/css/geoloc.css" />
+	<!-- Leaflet CSS -->
+	<link
+		rel="stylesheet"
+		href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+		crossorigin="anonymous"
+	/>
+</head>
+<body>
+	<header class="site-header">
+		<div class="header-content">
+			<h1>Groupie Tracker</h1>
+			<form class="header-search-form" action="/search.html" method="get">
+				<input type="search" name="q" placeholder="Rechercher un artiste..." aria-label="Recherche" class="header-search-input">
+				<button type="submit" class="btn header-search-btn">Recherche</button>
+			</form>
+			<nav class="main-nav" id="mainNav">
+				<a href="/">Accueil</a>
+				<a href="/filters">Filtres</a>
+				<a href="/geoloc.html">Géolocalisation</a>
+			</nav>
+			<button class="btn btn-subscribe" id="subscribeBtn">S'abonner</button>
+		</div>
+	</header>
+
+	<main class="container">
+		<section class="page-title">
+			<h2>Géolocalisation des Groupes</h2>
+			<p>Carte interactive des lieux de concerts avec les artistes et dates associées</p>
+		</section>
+
+		<section>
+			<div id="map" aria-label="Carte des concerts"></div>
+			<div id="geo-status" class="geo-status" aria-live="polite">Chargement des données…</div>
+		</section>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container footer-content">
+			<div class="footer-info">
+				<p>&copy; 2026 Groupie Tracker — Projet fait par Preston, Clément et Timéo</p>
 			</div>
-		</header>
+			<div class="footer-links">
+				<a href="/search.html">Rechercher</a>
+				<a href="/filters">Filtres</a>
+				<a href="/geoloc.html">Géolocalisation</a>
+			</div>
+		</div>
+	</footer>
 
-		<main class="container">
-			<section>
-				<p>
-					Carte interactive des lieux de concerts, avec les artistes et dates
-					associées.
-				</p>
-				<div id="map" aria-label="Carte des concerts"></div>
-				<div id="geo-status" class="geo-status" aria-live="polite">Chargement des données…</div>
-			</section>
-		</main>
-
-		<footer class="site-footer">
-			<div class="container">© Groupie Tracker</div>
-		</footer>
-
-		<!-- Leaflet JS -->
-		<script
-			src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-			crossorigin="anonymous"
-		></script>
-		<script src="/static/js/geoloc.js"></script>
-	</body>
+	<!-- Leaflet JS -->
+	<script
+		src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+		crossorigin="anonymous"
+	></script>
+	<script src="/static/js/ui.js"></script>
+	<script src="/static/js/geoloc.js"></script>
+</body>
 </html>
 
