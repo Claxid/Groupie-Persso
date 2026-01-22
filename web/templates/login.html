@@ -39,8 +39,8 @@
 
             <form id="loginForm" class="auth-form" autocomplete="on">
                 <label class="form-field">
-                    <span>Email</span>
-                    <input type="email" name="email" required placeholder="vous@example.com" />
+                    <span>ID utilisateur</span>
+                    <input type="number" name="id_utilisateur" required placeholder="123" />
                 </label>
                 <label class="form-field">
                     <span>Mot de passe</span>
@@ -60,24 +60,20 @@
                 <div class="form-grid">
                     <label class="form-field">
                         <span>Nom</span>
-                        <input type="text" name="last_name" required placeholder="Dupont" />
+                        <input type="text" name="nom" required placeholder="Dupont" />
                     </label>
                     <label class="form-field">
                         <span>Prénom</span>
-                        <input type="text" name="first_name" required placeholder="Marie" />
+                        <input type="text" name="prenom" required placeholder="Marie" />
                     </label>
                 </div>
-                <label class="form-field">
-                    <span>Email</span>
-                    <input type="email" name="email" required placeholder="vous@example.com" />
-                </label>
                 <label class="form-field">
                     <span>Mot de passe</span>
                     <input type="password" name="password" required placeholder="Choisissez un mot de passe" />
                 </label>
                 <label class="form-field">
                     <span>Sexe</span>
-                    <select name="gender" required>
+                    <select name="sexe" required>
                         <option value="">Sélectionner</option>
                         <option value="F">Femme</option>
                         <option value="M">Homme</option>
@@ -94,7 +90,7 @@
     <footer class="site-footer">
         <div class="container footer-content">
             <div class="footer-info">
-                <p>&copy; 2026 Groupie Tracker — Projet fait par Preston, Clément et Timéo</p>
+                <p>&copy; 2026 Groupie Tracker — Projet fait par Preston, Clément, Rayane et Timéo</p>
             </div>
             <div class="footer-links">
                 <a href="/search">Rechercher</a>
@@ -124,27 +120,64 @@
             });
         });
 
-        // Prevent real submit for now, show a toast-like message
-        const showMessage = (text) => {
+        const showMessage = (text, isError = false) => {
             const toast = document.createElement('div');
             toast.className = 'auth-toast';
+            if (isError) toast.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
             toast.textContent = text;
             document.body.appendChild(toast);
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 300);
-            }, 2200);
+            }, 2600);
         };
 
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        const postJSON = async (url, data) => {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const body = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                const msg = body.error || 'Erreur serveur';
+                throw new Error(msg);
+            }
+            return body;
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            showMessage('Connexion envoyée (branche l\'API pour continuer)');
+            const form = e.target;
+            const payload = {
+                id_utilisateur: parseInt(form.id_utilisateur.value, 10),
+                password: form.password.value
+            };
+            try {
+                await postJSON('/api/login', payload);
+                showMessage('Connexion réussie');
+            } catch (err) {
+                showMessage(err.message, true);
+            }
         });
 
-        document.getElementById('registerForm').addEventListener('submit', (e) => {
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            showMessage('Inscription envoyée (branche l\'API pour continuer)');
+            const form = e.target;
+            const payload = {
+                nom: form.nom.value,
+                prenom: form.prenom.value,
+                password: form.password.value,
+                sexe: form.sexe.value
+            };
+            try {
+                const res = await postJSON('/api/register', payload);
+                showMessage(`Compte créé. Votre ID: ${res.id_utilisateur}`);
+                form.reset();
+            } catch (err) {
+                showMessage(err.message, true);
+            }
         });
     </script>
 </body>
