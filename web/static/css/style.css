@@ -533,6 +533,8 @@ body, p, li, a{color:var(--muted-strong)}
     gap:10px;
     width:100%;
     max-width:540px;
+    opacity:1;
+    animation:fadeUp 0.7s ease forwards;
 }
 
 .vinyl-frame{
