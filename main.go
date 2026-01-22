@@ -121,6 +121,14 @@ func main() {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))
 	})
 
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "login.html"))
+	})
+
+	http.HandleFunc("/login.html", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "login.html"))
+	})
+
 	http.HandleFunc("/geoloc.html", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "geoloc.html"))
 	})

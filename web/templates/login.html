@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connexion / Inscription - Groupie Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-content">
+            <h1>Groupie Tracker</h1>
+            <nav class="main-nav" id="mainNav">
+                <a href="/">Accueil</a>
+                <a href="/filters">Filtres</a>
+                <a href="/geoloc.html">Géolocalisation</a>
+            </nav>
+            <div class="header-actions">
+                <a class="btn btn-auth" href="/login">Connexion / Inscription</a>
+                <button class="btn btn-subscribe" id="subscribeBtn">S'abonner</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container auth-container">
+        <section class="auth-hero">
+            <div>
+                <p class="auth-kicker">Bienvenue</p>
+                <h2>Crée ton compte ou connecte-toi</h2>
+                <p class="muted">Retrouve tes groupes favoris, enregistre tes filtres et reçois des alertes personnalisées.</p>
+            </div>
+        </section>
+
+        <section class="auth-card" aria-labelledby="authTabs">
+            <div class="auth-tabs" id="authTabs">
+                <button class="auth-tab active" data-target="login">Connexion</button>
+                <button class="auth-tab" data-target="register">Inscription</button>
+            </div>
+
+            <form id="loginForm" class="auth-form" autocomplete="on">
+                <label class="form-field">
+                    <span>Email</span>
+                    <input type="email" name="email" required placeholder="vous@example.com" />
+                </label>
+                <label class="form-field">
+                    <span>Mot de passe</span>
+                    <input type="password" name="password" required placeholder="••••••••" />
+                </label>
+                <div class="form-extra">
+                    <label class="remember">
+                        <input type="checkbox" name="remember" />
+                        <span>Se souvenir de moi</span>
+                    </label>
+                    <a href="#" class="muted">Mot de passe oublié ?</a>
+                </div>
+                <button type="submit" class="btn btn-primary auth-submit">Se connecter</button>
+            </form>
+
+            <form id="registerForm" class="auth-form hidden" autocomplete="on">
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span>Nom</span>
+                        <input type="text" name="last_name" required placeholder="Dupont" />
+                    </label>
+                    <label class="form-field">
+                        <span>Prénom</span>
+                        <input type="text" name="first_name" required placeholder="Marie" />
+                    </label>
+                </div>
+                <label class="form-field">
+                    <span>Email</span>
+                    <input type="email" name="email" required placeholder="vous@example.com" />
+                </label>
+                <label class="form-field">
+                    <span>Mot de passe</span>
+                    <input type="password" name="password" required placeholder="Choisissez un mot de passe" />
+                </label>
+                <label class="form-field">
+                    <span>Sexe</span>
+                    <select name="gender" required>
+                        <option value="">Sélectionner</option>
+                        <option value="F">Femme</option>
+                        <option value="M">Homme</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn btn-primary auth-submit">Créer mon compte</button>
+            </form>
+
+            <p class="auth-note muted">Ces formulaires sont prêts à être reliés à ta BDD (Nom, Prénom, sexe, id_user). Branche simplement les endpoints backend quand tu seras prêt.</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-content">
+            <div class="footer-info">
+                <p>&copy; 2026 Groupie Tracker — Projet fait par Preston, Clément et Timéo</p>
+            </div>
+            <div class="footer-links">
+                <a href="/search">Rechercher</a>
+                <a href="/filters">Filtres</a>
+                <a href="/geoloc.html">Géolocalisation</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/static/js/ui.js?v=20260102"></script>
+    <script src="/static/js/subscription.js"></script>
+    <script>
+        // Simple tabs for Connexion / Inscription
+        const tabs = document.querySelectorAll('.auth-tab');
+        const forms = {
+            login: document.getElementById('loginForm'),
+            register: document.getElementById('registerForm')
+        };
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                const target = tab.dataset.target;
+                Object.keys(forms).forEach(key => {
+                    forms[key].classList.toggle('hidden', key !== target);
+                });
+            });
+        });
+
+        // Prevent real submit for now, show a toast-like message
+        const showMessage = (text) => {
+            const toast = document.createElement('div');
+            toast.className = 'auth-toast';
+            toast.textContent = text;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 2200);
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showMessage('Connexion envoyée (branche l\'API pour continuer)');
+        });
+
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showMessage('Inscription envoyée (branche l\'API pour continuer)');
+        });
+    </script>
+</body>
+</html>
