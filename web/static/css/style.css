@@ -32,8 +32,8 @@ body{
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
-    /* Fond: dégradé + image */
-    background-image: linear-gradient(135deg, rgba(12,12,18,0.92) 0%, rgba(15,17,28,0.8) 45%, rgba(10,8,18,0.9) 100%), url('/static/images/Fond_GroupieTracker.png');
+    /* Fond: dégradé + image (fallback vers vinyle.png existant) */
+    background-image: linear-gradient(135deg, rgba(12,12,18,0.92) 0%, rgba(15,17,28,0.8) 45%, rgba(10,8,18,0.9) 100%), url('/static/images/vinyle.png');
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;

@@ -16,6 +16,8 @@ func SetupRoutes(db *sql.DB) {
 	http.HandleFunc("/api/locations-proxy", CreateProxy("https://groupietrackers.herokuapp.com/api/locations"))
 	http.HandleFunc("/api/dates-proxy", CreateProxy("https://groupietrackers.herokuapp.com/api/dates"))
 	http.HandleFunc("/api/relation-proxy", CreateProxy("https://groupietrackers.herokuapp.com/api/relation"))
+	// Alias pour compatibilité (certains JS utilisent /api/relations-proxy)
+	http.HandleFunc("/api/relations-proxy", CreateProxy("https://groupietrackers.herokuapp.com/api/relation"))
 	log.Println("API proxy routes registered")
 
 	// Static files
