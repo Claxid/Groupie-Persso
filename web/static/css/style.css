@@ -235,6 +235,7 @@ body, p, li, a{color:var(--muted-strong)}
 
 /* Vinyl row fixed to bottom: repeated vinyl images */
 .vinyl-area{padding-top:0;padding-bottom:0}
+.vinyl-grid{min-height:600px}
 
 /* Vinyl rows placed inside a `.container` so they sit on same layer */
 .vinyl-rows{

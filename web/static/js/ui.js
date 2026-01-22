@@ -170,7 +170,8 @@ document.addEventListener('DOMContentLoaded', function () {
 	
 	// URL du proxy local pour récupérer les relations dates↔lieux
 	// Format: {"index": [{"id": 1, "datesLocations": {"usa-new_york": ["*23-08-2019"], ...}}, ...]}
-	const LOCAL_RELATIONS_API = '/api/relations-proxy';
+	// Correspond à la route Go /api/relation-proxy (sans s)
+	const LOCAL_RELATIONS_API = '/api/relation-proxy';
 	
 	// URL directe de l'API Groupie Trackers pour les relations (fallback)
 	// Note: l'API utilise '/relation' (singulier) au lieu de '/relations'

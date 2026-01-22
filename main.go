@@ -88,7 +88,9 @@ func main() {
 	http.HandleFunc("/api/artists-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/artists"))
 	http.HandleFunc("/api/locations-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/locations"))
 	http.HandleFunc("/api/dates-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/dates"))
+	// Alias avec et sans 's' pour éviter les erreurs de route
 	http.HandleFunc("/api/relation-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/relation"))
+	http.HandleFunc("/api/relations-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/relation"))
 
 	// Route racine pour index.html
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
