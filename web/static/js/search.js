@@ -118,9 +118,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	async function ensureData() {
 		if (allArtists.length) return allArtists;
-		const resp = await fetch('/api/artists-proxy', { headers: { 'Accept': 'application/json' } });
-		if (!resp.ok) throw new Error('Réponse réseau incorrecte: ' + resp.status);
-		const data = await resp.json();
+
+		async function fetchArtists(url) {
+			const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+			if (!resp.ok) throw new Error('Réponse réseau incorrecte: ' + resp.status);
+			return resp.json();
+		}
+
+		let data;
+		try {
+			data = await fetchArtists('/api/artists-proxy');
+		} catch (err) {
+			// Fallback direct vers l'API publique si le proxy n'est pas dispo (Netlify/statique)
+			try {
+				data = await fetchArtists('https://groupietrackers.herokuapp.com/api/artists');
+			} catch (fallbackErr) {
+				throw fallbackErr;
+			}
+		}
+
 		allArtists = Array.isArray(data) ? data : (data.artists || []);
 		return allArtists;
 	}
