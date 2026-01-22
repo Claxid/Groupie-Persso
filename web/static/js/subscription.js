@@ -1,6 +1,19 @@
+// ============================================================================
+// MODULE D'ABONNEMENT: MODAL, FORMULAIRE, VALIDATION, SIMULATION DE PAIEMENT
+// ============================================================================
+// Ce script gère:
+// - L'ouverture/fermeture du modal d'abonnement
+// - La sélection d'un plan et le calcul du prix
+// - La saisie et validation de carte (formatage simple)
+// - La simulation d'un paiement (setTimeout) et persistance localStorage
+// - L'état d'abonnement au chargement
+// ============================================================================
+// Note: C'est une simulation (aucune API réelle de paiement utilisée).
+// Ne jamais stocker des numéros de carte réels côté client.
+// ============================================================================
 // Subscription Module
 (function() {
-    // DOM Elements
+    // Références DOM
     const subscribeBtn = document.getElementById('subscribeBtn');
     const modal = document.getElementById('subscriptionModal');
     const closeModal = document.getElementById('closeModal');
@@ -15,18 +28,18 @@
     const totalPriceEl = document.getElementById('totalPrice');
     const planNameEl = document.getElementById('planName');
     
-    // State
+    // État courant du modal et de la sélection
     let selectedPlan = null;
     let selectedPrice = null;
     let selectedPlanName = null;
 
-    // Open modal
+    // Ouvrir le modal d'abonnement
     subscribeBtn?.addEventListener('click', () => {
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
     });
 
-    // Close modal
+    // Fermer le modal (croix ou clic sur overlay)
     closeModal?.addEventListener('click', closeModalHandler);
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -34,6 +47,7 @@
         }
     });
 
+    // Masquer le modal et réinitialiser l'état
     function closeModalHandler() {
         modal.classList.remove('active');
         document.body.style.overflow = 'auto';
@@ -41,18 +55,18 @@
         resetModal();
     }
 
-    // Plan selection
+    // Sélection d'un plan d'abonnement (boutons "Choisir")
     paymentButtons.forEach(button => {
         button.addEventListener('click', () => {
             selectedPlan = button.getAttribute('data-plan');
             selectedPrice = button.getAttribute('data-price');
             selectedPlanName = button.closest('.plan').querySelector('h3').textContent;
             
-            // Show payment form
+            // Afficher le formulaire de paiement
             subscriptionPlans.style.display = 'none';
             paymentForm.classList.remove('hidden');
             
-            // Update price display
+            // Mettre à jour l'affichage du prix formaté en FR
             const priceFormatted = parseFloat(selectedPrice).toLocaleString('fr-FR', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
@@ -62,25 +76,25 @@
         });
     });
 
-    // Back to plans
+    // Retour à la grille des plans (bouton retour)
     backToPlans?.addEventListener('click', () => {
         subscriptionPlans.style.display = 'grid';
         paymentForm.classList.add('hidden');
         cardForm.reset();
     });
 
-    // Form submission
+    // Soumission du formulaire de carte (simulé)
     cardForm?.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        // Get form data
+        // Récupérer les valeurs du formulaire
         const cardholderName = document.getElementById('cardholderName').value;
         const cardNumber = document.getElementById('cardNumber').value;
         const expiryDate = document.getElementById('expiryDate').value;
         const cvv = document.getElementById('cvv').value;
         const email = document.getElementById('email').value;
 
-        // Basic validation
+        // Validation basique (format uniquement)
         if (!validateCardNumber(cardNumber)) {
             showError('Numéro de carte invalide');
             return;
@@ -96,11 +110,11 @@
             return;
         }
 
-        // Simulate payment processing
+        // Simuler un traitement de paiement (API fictive)
         processPayment(cardholderName, cardNumber, expiryDate, cvv, email);
     });
 
-    // Card number formatting
+    // Formatage du numéro de carte en groupes de 4 (XXXX XXXX XXXX XXXX)
     document.getElementById('cardNumber')?.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\s/g, '');
         let formattedValue = '';
@@ -111,7 +125,7 @@
         e.target.value = formattedValue;
     });
 
-    // Expiry date formatting
+    // Formatage de la date d'expiration MM/YY
     document.getElementById('expiryDate')?.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, '');
         if (value.length >= 2) {
@@ -120,12 +134,12 @@
         e.target.value = value;
     });
 
-    // CVV only numbers
+    // CVV: n'accepter que des chiffres
     document.getElementById('cvv')?.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/\D/g, '');
     });
 
-    // Validation functions
+    // Fonctions de validation (format uniquement; pas de Luhn réel ici)
     function validateCardNumber(cardNumber) {
         // Simple validation - just check if it has 16 digits
         const cleanNumber = cardNumber.replace(/\s/g, '');
@@ -140,7 +154,7 @@
         return /^\d{3,4}$/.test(cvv);
     }
 
-    // Payment processing
+    // Traitement de paiement simulé et persistance localStorage
     function processPayment(name, cardNumber, expiry, cvv, email) {
         // Show loading state
         const submitBtn = cardForm.querySelector('button[type="submit"]');
@@ -148,15 +162,15 @@
         submitBtn.textContent = 'Traitement...';
         submitBtn.disabled = true;
 
-        // Simulate API call
+        // Simulation d'appel API (2 secondes)
         setTimeout(() => {
-            // Hide payment form
+            // Masquer le formulaire de paiement
             paymentForm.classList.add('hidden');
             
-            // Show success message
+            // Afficher le message de succès
             successMessage.classList.remove('hidden');
             
-            // Log subscription info (in a real app, this would be sent to a server)
+            // Log d'information (dans une vraie app, on enverrait au serveur)
             console.log('Paiement réussi:', {
                 plan: selectedPlan,
                 planName: selectedPlanName,
@@ -166,7 +180,7 @@
                 timestamp: new Date().toISOString()
             });
 
-            // Store subscription in localStorage
+            // Stocker l'abonnement en localStorage (démo)
             const subscription = {
                 plan: selectedPlan,
                 planName: selectedPlanName,
@@ -183,15 +197,15 @@
         }, 2000);
     }
 
-    // Close success message
+    // Fermer le message de succès
     closeSuccess?.addEventListener('click', closeModalHandler);
 
-    // Error handling
+    // Affichage d'erreur simple (alert)
     function showError(message) {
         alert(message);
     }
 
-    // Reset modal state
+    // Réinitialiser l'état du modal et du formulaire
     function resetModal() {
         subscriptionPlans.style.display = 'grid';
         paymentForm.classList.add('hidden');
@@ -202,7 +216,7 @@
         selectedPlanName = null;
     }
 
-    // Check if user is already subscribed
+    // Vérifier l'abonnement existant au chargement
     function checkSubscriptionStatus() {
         const subscription = localStorage.getItem('groupie_subscription');
         if (subscription) {
@@ -212,6 +226,6 @@
         }
     }
 
-    // Initialize on load
+    // Initialiser la vérification d'abonnement à DOMContentLoaded
     document.addEventListener('DOMContentLoaded', checkSubscriptionStatus);
 })();

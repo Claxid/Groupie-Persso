@@ -1,23 +1,25 @@
+/* Titre principal: taille et couleur en hero */
 h1 {
     font-size: 2.5em;
     color: #f8fafc;
     margin-bottom: 0.5em;
 }
 
+/* Variables CSS (thème glassmorphism) */
 :root{
-    --charcoal: #0d0f14;
-    --panel: rgba(20,22,30,0.55);
-    --panel-strong: rgba(20,22,30,0.75);
-    --muted: #c4c9d4;
-    --muted-strong: #e9ecf5;
-    --gold: #ec4899;
-    --electric: #06b6d4;
-    --accent: linear-gradient(120deg, #06b6d4, #a78bfa);
-    --accent-solid: #a78bfa;
-    --glass-border: rgba(255,255,255,0.08);
-    --radius: 14px;
-    --max-width: 1800px;
-    --shadow-strong: 0 20px 70px rgba(0,0,0,0.4);
+    --charcoal: #0d0f14; /* fond sombre */
+    --panel: rgba(20,22,30,0.55); /* panneau translucide */
+    --panel-strong: rgba(20,22,30,0.75); /* panneau plus opaque */
+    --muted: #c4c9d4; /* texte secondaire */
+    --muted-strong: #e9ecf5; /* texte primaire */
+    --gold: #ec4899; /* accent rose */
+    --electric: #06b6d4; /* accent cyan */
+    --accent: linear-gradient(120deg, #06b6d4, #a78bfa); /* dégradé principal */
+    --accent-solid: #a78bfa; /* violet fixe */
+    --glass-border: rgba(255,255,255,0.08); /* bordure verre */
+    --radius: 14px; /* arrondi global */
+    --max-width: 1800px; /* largeur max container */
+    --shadow-strong: 0 20px 70px rgba(0,0,0,0.4); /* ombre profonde */
 }
 
 /* Reset & base */
@@ -30,6 +32,7 @@ body{
     line-height:1.5;
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
+    /* Fond: dégradé + image */
     background-image: linear-gradient(135deg, rgba(12,12,18,0.92) 0%, rgba(15,17,28,0.8) 45%, rgba(10,8,18,0.9) 100%), url('/static/images/Fond_GroupieTracker.png');
     background-size: cover;
     background-position: center center;
@@ -38,7 +41,7 @@ body{
     min-height:100vh;
 }
 
-/* Page container */
+/* Conteneur page: panneau glass */
 .container{
     max-width:var(--max-width);
     margin:1.25rem auto;
@@ -50,7 +53,7 @@ body{
     backdrop-filter: blur(14px);
 }
 
-/* Header */
+/* En-tête principal */
 .site-header{
     padding: 0.85rem 1.5rem;
     background: var(--panel-strong);

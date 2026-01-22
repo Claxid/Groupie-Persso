@@ -1,3 +1,14 @@
+// ============================================================================
+// PAGE RECHERCHE: SUGGESTIONS, FILTRES RAPIDES, MODAL DÉTAIL ARTISTE
+// ============================================================================
+// Ce script gère:
+// - Le chargement des artistes via proxy + fallback
+// - La recherche par nom avec suggestions instantanées
+// - Les filtres rapides (chips) appliqués dynamiquement
+// - L'affichage d'un modal détail pour un artiste
+// - L'accessibilité clavier (Enter/Espace) et Escape pour fermer
+// ============================================================================
+
 document.addEventListener('DOMContentLoaded', () => {
 	const form = document.getElementById('searchForm');
 	const results = document.getElementById('results');
@@ -6,11 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
 	const quickFilters = document.getElementById('quickFilters');
 	const clearBtn = document.getElementById('clearSearch');
 
+	// Cache local des artistes (chargé une seule fois)
 	let allArtists = [];
+	// Filtre actif (id du chip), null si aucun
 	let activeFilter = null;
+	// Références au modal (conteneur et backdrop overlay)
 	let modalEl = null;
 	let modalBackdrop = null;
 
+	// Créer le modal si nécessaire (lazy initialization)
 	function ensureModal() {
 		if (modalEl) return;
 		modalBackdrop = document.createElement('div');
@@ -18,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		modalEl = document.createElement('div');
 		modalEl.className = 'search-modal';
 
+		// Bouton de fermeture (croix)
 		const closeBtn = document.createElement('button');
 		closeBtn.className = 'search-modal__close';
 		closeBtn.textContent = '×';
@@ -31,24 +47,29 @@ document.addEventListener('DOMContentLoaded', () => {
 		modalBackdrop.appendChild(modalEl);
 		document.body.appendChild(modalBackdrop);
 
+		// Fermer si clic sur l'overlay (hors panneau)
 		modalBackdrop.addEventListener('click', (e) => {
 			if (e.target === modalBackdrop) hideModal();
 		});
+		// Fermer avec la touche Escape (accessibilité clavier)
 		document.addEventListener('keydown', (e) => {
 			if (e.key === 'Escape') hideModal();
 		});
 	}
 
+	// Retirer la classe 'open' pour cacher le modal
 	function hideModal() {
 		if (modalBackdrop) modalBackdrop.classList.remove('open');
 	}
 
+	// Remplir le contenu du modal avec les infos d'un artiste
 	function renderModalContent(artist) {
 		if (!modalEl) return;
 		const content = modalEl.querySelector('.search-modal__content');
 		if (!content) return;
 		content.innerHTML = '';
 
+		// En-tête: nom + métadonnées
 		const header = document.createElement('div');
 		header.className = 'search-modal__header';
 		const h2 = document.createElement('h2');
@@ -64,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			header.appendChild(meta);
 		}
 
+		// Image de l'artiste si disponible
 		if (artist.image) {
 			const imgWrap = document.createElement('div');
 			imgWrap.className = 'search-modal__media';
@@ -77,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		content.appendChild(header);
 
+		// Liste des membres
 		const members = Array.isArray(artist.members) ? artist.members : [];
 		const info = document.createElement('div');
 		info.className = 'search-modal__info';
@@ -96,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		content.appendChild(info);
 
+		// Lien vers site officiel si disponible
 		const links = document.createElement('div');
 		links.className = 'search-modal__links';
 		const official = artist.url || artist.website || artist.link;
@@ -110,15 +134,18 @@ document.addEventListener('DOMContentLoaded', () => {
 		content.appendChild(links);
 	}
 
+	// Afficher le modal: assure la structure puis affiche le contenu
 	function showModal(artist) {
 		ensureModal();
 		renderModalContent(artist);
 		if (modalBackdrop) modalBackdrop.classList.add('open');
 	}
 
+	// Charger et mettre en cache les données artistes (proxy + fallback API)
 	async function ensureData() {
 		if (allArtists.length) return allArtists;
 
+		// Helper pour fetch JSON avec vérification d'état HTTP
 		async function fetchArtists(url) {
 			const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
 			if (!resp.ok) throw new Error('Réponse réseau incorrecte: ' + resp.status);
@@ -141,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		return allArtists;
 	}
 
+	// Appliquer un filtre rapide (chip) sur un artiste donné
 	function filterByBadge(artist, filterId) {
 		if (!filterId) return true;
 		const name = (artist.name || '').toLowerCase();
@@ -164,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
+	// Afficher les résultats sous forme de cartes cliquables
 	function renderResults(list) {
 		if (!results) return;
 		results.innerHTML = '';
@@ -178,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			card.tabIndex = 0;
 			card.setAttribute('role','button');
 
+			// Déterminer une URL d'image plausible en essayant plusieurs champs
 			const imageUrl = artist.image || artist.imageUrl || artist.picture || artist.photo || artist.thumbnail || artist.img || artist.thumb || artist.image_url || artist.photo_url || artist.avatar;
 			if (imageUrl) {
 				const media = document.createElement('div');
@@ -228,7 +258,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			card.appendChild(body);
 			results.appendChild(card);
 
+			// Click pour ouvrir le modal
 			card.addEventListener('click', () => showModal(artist));
+			// Accessibilité: Enter ou Espace pour ouvrir le modal
 			card.addEventListener('keydown', (e) => {
 				if (e.key === 'Enter' || e.key === ' ') {
 					e.preventDefault();
@@ -243,6 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
+	// Effectuer la recherche par nom, appliquer filtre actif, et afficher
 	async function performSearch(q) {
 		if (!results) return;
 		results.innerHTML = '<p>Recherche en cours…</p>';
@@ -258,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				? data.filter(a => (a.name || '').toLowerCase().includes(qLower))
 				: data.slice(0, 24);
 
+			// Appliquer le filtre rapide actif
 			filtered = filtered.filter(a => filterByBadge(a, activeFilter));
 
 			if (filtered.length === 0) {
@@ -271,6 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
+	// Mettre à jour les suggestions instantanées sous l'input
 	function updateSuggestions() {
 		if (!suggestionsEl || !input) return;
 		const q = input.value.trim().toLowerCase();
@@ -302,6 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		suggestionsEl.classList.add('show');
 	}
 
+	// Basculer l'état du filtre rapide et rafraîchir les résultats
 	function setActiveFilter(id) {
 		activeFilter = id === activeFilter ? null : id;
 		if (!quickFilters) return;
@@ -312,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		performSearch(input ? input.value.trim() : '');
 	}
 
+	// Gestion des clics sur les filtres rapides (chips)
 	if (quickFilters) {
 		quickFilters.addEventListener('click', (e) => {
 			const btn = e.target.closest('[data-filter]');
@@ -320,6 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
+	// Suggestions: écouter input/focus et clic ailleurs pour cacher
 	if (input) {
 		input.addEventListener('input', () => {
 			ensureData().then(updateSuggestions).catch(() => {});
@@ -335,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
+	// Soumission du formulaire de recherche
 	if (form) {
 		form.addEventListener('submit', (e) => {
 			e.preventDefault();
@@ -343,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
+	// Bouton pour effacer la recherche et les filtres
 	if (clearBtn) {
 		clearBtn.addEventListener('click', () => {
 			if (input) input.value = '';
@@ -353,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// If the page was opened with a query param (?q=...), run the search automatically
+	// Si la page a été ouverte avec un paramètre (?q=...), lancer la recherche automatiquement
 	if (typeof window !== 'undefined') {
 		const params = new URLSearchParams(window.location.search);
 		const q = params.get('q') || params.get('artist');
@@ -361,11 +401,12 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (input) input.value = q;
 			ensureData().then(() => performSearch(q));
 		} else {
-			// prefetch data to enable instant suggestions
+			// Précharger les données pour activer les suggestions instantanées
 			ensureData().catch(() => {});
 		}
 	}
 
+	// Échapper les caractères HTML pour éviter l'injection dans messages d'erreur
 	function escapeHtml(str) {
 		return String(str)
 			.replace(/&/g, '&amp;')

@@ -1,26 +1,38 @@
+<!-- Page d'accueil du site Groupie Tracker -->
 <!DOCTYPE html>
+<!-- HTML en français pour cohérence linguistique -->
 <html lang="fr">
     <head>
+        <!-- Encodage des caractères -->
         <meta charset="utf-8" />
+        <!-- Mise en page responsive -->
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- Titre de la page -->
         <title>Groupie Tracker</title>
+        <!-- Description pour SEO et aperçus -->
         <meta name="description" content="Trouvez des groupes de musique et suivez leurs dates et lieux." />
-        <!-- Fonts -->
+        <!-- Import des polices (Inter, Merriweather) -->
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+        <!-- Feuille de style principale -->
         <link rel="stylesheet" href="/static/css/style.css" />
     </head>
     <body>
+        <!-- En-tête du site avec recherche et navigation -->
         <header class="site-header">
             <div class="header-content">
+                <!-- Branding du site -->
                 <h1>Groupie Tracker</h1>
+                <!-- Formulaire de recherche pointant vers la page /search.html -->
                 <form id="headerSearch" class="header-search-form" action="/search.html" method="get">
                     <input type="search" name="q" placeholder="Rechercher un artiste..." aria-label="Recherche" class="header-search-input">
                     <button type="submit" class="btn header-search-btn">Recherche</button>
                 </form>
+                <!-- Navigation principale -->
                 <nav class="main-nav" id="mainNav">
                     <a href="/">Accueil</a>
                     <a href="/geoloc.html">Géolocalisation</a>
                 </nav>
+                <!-- Actions complémentaires (auth, abonnement) -->
                 <div class="header-actions">
                     <a class="btn btn-auth" href="/login">Connexion / Inscription</a>
                     <button class="btn btn-subscribe" id="subscribeBtn">S'abonner</button>
@@ -28,7 +40,9 @@
             </div>
         </header>
 
+        <!-- Contenu principal -->
         <main class="container">
+            <!-- Section héro: message d'introduction et CTA -->
             <section class="hero">
                 <h2>Trouvez facilement vos groupes préférés</h2>
                 <p>
@@ -40,6 +54,7 @@
                 </p>
             </section>
 
+            <!-- Section des fonctionnalités clés -->
             <section class="features">
                 <article>
                     <h3>Recherche</h3>
@@ -56,17 +71,22 @@
             </section>
         </main>
 
+        <!-- Zone décorative des vinyles (optionnelle, cachée aux lecteurs d'écran) -->
         <section class="vinyl-area container" aria-hidden="true">
             <div class="vinyl-grid"></div>
         </section>
 
-        <!-- Modal d'abonnement -->
+        <!-- Modale d'abonnement Premium -->
         <div id="subscriptionModal" class="modal">
             <div class="modal-content">
+                <!-- Bouton de fermeture de la modale -->
                 <button class="modal-close" id="closeModal">&times;</button>
+                <!-- Titre de la modale -->
                 <h2>S'abonner à Groupie Tracker Premium</h2>
+                <!-- Description commerciale -->
                 <p class="subscription-description">Accédez à des fonctionnalités exclusives et suivez vos artistes préférés sans limite.</p>
                 
+                <!-- Choix des plans d'abonnement -->
                 <div class="subscription-plans">
                     <div class="plan">
                         <h3>Plan Mensuel</h3>
@@ -81,7 +101,7 @@
                     </div>
                 </div>
 
-                <!-- Formulaire de paiement par carte -->
+                <!-- Formulaire de paiement par carte (affiché après choix du plan) -->
                 <div id="paymentForm" class="payment-form hidden">
                     <h3>Détails de paiement</h3>
                     <form id="cardForm">
@@ -111,16 +131,19 @@
                             <input type="email" id="email" name="email" placeholder="vous@exemple.com" required>
                         </div>
 
+                        <!-- Résumé du prix sélectionné -->
                         <div class="price-summary">
                             <p>Montant: <strong id="totalPrice">0,00 €</strong></p>
                             <p id="planName"></p>
                         </div>
 
+                        <!-- Actions du formulaire de paiement -->
                         <button type="submit" class="btn btn-primary">Valider le paiement</button>
                         <button type="button" class="btn btn-secondary" id="backToPlans">Retour</button>
                     </form>
                 </div>
 
+                <!-- Message de succès après paiement -->
                 <div id="successMessage" class="success-message hidden">
                     <h3>✓ Paiement réussi!</h3>
                     <p>Votre abonnement est maintenant actif. Merci pour votre confiance!</p>
@@ -129,6 +152,7 @@
             </div>
         </div>
 
+        <!-- Pied de page du site -->
         <footer class="site-footer">
             <div class="container footer-content">
                 <div class="footer-info">
@@ -140,6 +164,7 @@
                 </div>
             </div>
         </footer>
+        <!-- Scripts: UI global et gestion abonnement -->
         <script src="/static/js/ui.js?v=20260102"></script>
         <script src="/static/js/subscription.js"></script>
     </body>

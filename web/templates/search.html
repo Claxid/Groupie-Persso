@@ -1,3 +1,4 @@
+<!-- Page Recherche: formulaire, filtres rapides, résultats -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,9 +10,11 @@
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
 	<link rel="stylesheet" href="/static/css/style.css">
 	<link rel="stylesheet" href="/static/css/search.css">
+	<!-- Éviter l'indexation par les moteurs (démo) -->
 	<meta name="robots" content="noindex">
 </head>
 <body>
+    <!-- En-tête avec barre de recherche + nav principale -->
 	<header class="site-header">
 		<div class="header-content">
 			<h1>Groupie Tracker</h1>
@@ -27,12 +30,14 @@
 		</div>
 	</header>
 
+    <!-- Conteneur principal de la page -->
 	<main class="container">
 		<section class="page-title">
 			<h2>Recherche d'artistes</h2>
 			<p>Trouvez vos groupes préférés et découvrez leurs dates de concerts</p>
 		</section>
 
+        <!-- Formulaire de recherche avec suggestions dynamiques -->
 		<form id="searchForm" class="search-form">
 			<label for="query">Nom de l'artiste :</label>
 			<div class="input-stack">
@@ -51,11 +56,13 @@
 			</div>
 		</form>
 
+        <!-- Zone de résultats mise à jour dynamiquement -->
 		<section id="results" class="results" aria-live="polite">
 			<p>Entrez un nom ou utilisez un filtre pour voir les résultats.</p>
 		</section>
 	</main>
 
+    <!-- Pied de page du site -->
 	<footer class="site-footer">
 		<div class="container footer-content">
 			<div class="footer-info">
@@ -68,6 +75,7 @@
 		</div>
 	</footer>
 
+    <!-- Scripts UI communs + logique de recherche -->
 	<script src="/static/js/ui.js"></script>
 	<script src="/static/js/search.js"></script>
 </body>
