@@ -981,7 +981,8 @@ body, p, li, a{color:var(--muted-strong)}
     padding: 2rem 0;
 }
 
-.modal.active {
+.modal.active,
+.modal.open {
     display: flex;
     align-items: flex-start;
     justify-content: center;
