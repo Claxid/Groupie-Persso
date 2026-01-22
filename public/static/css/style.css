@@ -312,12 +312,14 @@ body, p, li, a {
 .vinyl-grid {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(4, auto);
-    gap: 20px 20px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px 30px;
     align-items: start;
     justify-content: center;
     justify-items: center;
-    padding: 12px 6px 40px 6px;
+    padding: 20px 10px 50px 10px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .vinyl-item {
