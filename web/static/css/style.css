@@ -271,7 +271,10 @@ body, p, li, a{color:var(--muted-strong)}
     opacity:0;
 }
 
-.vinyl-frame{
+.vinyl-item.fade-in{
+    animation:fadeUp 0.7s ease forwards !important;
+    opacity:1 !important;
+}
     width:380px;
     height:380px;
     display:flex;
@@ -349,7 +352,6 @@ body, p, li, a{color:var(--muted-strong)}
     box-shadow:0 12px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.15);
 }
 
-.vinyl-item.fade-in{animation:fadeUp 0.7s ease forwards}
 .vinyl-caption{
     font-size:1.1rem;
     color:var(--muted-strong);

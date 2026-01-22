@@ -1,34 +1,29 @@
-// Package main: serveur HTTP ultra-compact | Logique métier en database.go, auth.go, routes.go
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+
+	"groupiepersso/internal/database"
+	"groupiepersso/internal/handlers"
 )
 
-// defer recover: capture paniques | InitDB: connexion MySQL | SetupRoutes: routes HTTP | ListenAndServe: serveur
 func main() {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Fatalf("panic: %v", r)
-		}
-	}()
-	var db *sql.DB
-	if os.Getenv("DISABLE_DB") != "1" {
-		if c, e := InitDB(); e != nil {
-			log.Printf("DB disabled: %v", e)
-		} else {
-			db = c
-			log.Println("DB connected")
-		}
+	handlers.DB, _ = database.InitDB()
+	handlers.SetupStaticRoutes(filepath.Join("web", "static"))
+	handlers.SetupTemplateRoutes()
+	http.HandleFunc("/api/artists-proxy", handlers.ProxyHandler("https://groupietrackers.herokuapp.com/api/artists"))
+	http.HandleFunc("/api/locations-proxy", handlers.ProxyHandler("https://groupietrackers.herokuapp.com/api/locations"))
+	http.HandleFunc("/api/dates-proxy", handlers.ProxyHandler("https://groupietrackers.herokuapp.com/api/dates"))
+	http.HandleFunc("/api/relation-proxy", handlers.ProxyHandler("https://groupietrackers.herokuapp.com/api/relation"))
+	http.HandleFunc("/api/register", handlers.HandleRegister)
+	http.HandleFunc("/api/login", handlers.HandleLogin)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
 	}
-	SetupRoutes(db)
-	p := os.Getenv("PORT")
-	if p == "" {
-		p = "8080"
-	}
-	log.Printf("Server on :%s", p)
-	log.Fatal(http.ListenAndServe(":"+p, nil))
+	log.Printf("Starting server on :%s — open http://localhost:%s/", port, port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
