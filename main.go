@@ -46,7 +46,14 @@ func main() {
 			http.Error(w, "missing url", http.StatusBadRequest)
 			return
 		}
-		resp, err := http.Get(url)
+		// Certaines API refusent les requêtes sans User-Agent : forçons-en un.
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			http.Error(w, "invalid url", http.StatusBadRequest)
+			return
+		}
+		req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; GroupieProxy/1.0)")
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			http.Error(w, "upstream error", http.StatusBadGateway)
 			return
