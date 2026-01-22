@@ -313,7 +313,8 @@ body, p, li, a {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 40px 30px;
+    row-gap: 20px;
+    column-gap: 30px;
     align-items: start;
     justify-content: center;
     justify-items: center;
