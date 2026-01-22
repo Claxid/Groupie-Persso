@@ -3,10 +3,8 @@ services:
     name: groupie-tracker
     runtime: go
     runtimeVersion: "1.22"
-    buildCommand: go build -o server main.go database.go auth.go routes.go
-    startCommand: ./server
+    buildCommand: go build -tags netgo -ldflags '-s -w' -o app main.go database.go auth.go routes.go
+    startCommand: ./app
     envVars:
       - key: PORT
         value: 8080
-      - key: DISABLE_DB
-        value: 1
