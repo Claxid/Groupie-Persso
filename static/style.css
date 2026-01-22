@@ -222,7 +222,7 @@ body, p, li, a{color:var(--muted-strong)}
 .vinyl-grid{
     width:100%;
     display:grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap:40px 30px;
     align-items:start;
     justify-content:center;
