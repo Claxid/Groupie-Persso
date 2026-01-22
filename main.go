@@ -39,6 +39,31 @@ func main() {
 	fs := http.FileServer(http.Dir(filepath.Join("web", "static")))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
+	// Proxy audio pour contourner CORS sur les previews externes
+	http.HandleFunc("/api/audio-proxy", func(w http.ResponseWriter, r *http.Request) {
+		url := r.URL.Query().Get("url")
+		if url == "" {
+			http.Error(w, "missing url", http.StatusBadRequest)
+			return
+		}
+		resp, err := http.Get(url)
+		if err != nil {
+			http.Error(w, "upstream error", http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
+
+		// Copier content-type si présent
+		if ct := resp.Header.Get("Content-Type"); ct != "" {
+			w.Header().Set("Content-Type", ct)
+		} else {
+			w.Header().Set("Content-Type", "audio/mpeg")
+		}
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+	})
+
 	// Routes pour les templates
 	http.HandleFunc("/search.html", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))

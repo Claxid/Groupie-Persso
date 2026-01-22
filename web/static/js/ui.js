@@ -621,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function () {
 							audioLoading = false;
 							
 							// Retourner l'URL HTTPS de la preview
-							return preview;
+							return `/api/audio-proxy?url=${encodeURIComponent(preview)}`;
 						}
 					}
 					
@@ -676,7 +676,7 @@ document.addEventListener('DOMContentLoaded', function () {
 							audioLoading = false;
 							
 							// Retourner l'URL HTTPS de la preview
-							return preview;
+							return `/api/audio-proxy?url=${encodeURIComponent(preview)}`;
 						}
 					}
 					
