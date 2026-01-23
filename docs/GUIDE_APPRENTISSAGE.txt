@@ -1,0 +1,1051 @@
+================================================================================
+    GUIDE SUPER SIMPLE - COMPRENDRE GROUPIE TRACKERS LIGNE PAR LIGNE
+================================================================================
+
+📖 TABLE DES MATIÈRES
+==================
+1. C'est quoi ce projet ? (Explication ultra simple)
+2. Le serveur Go expliqué ligne par ligne
+3. Le JavaScript expliqué ligne par ligne
+4. Comment tout fonctionne ensemble
+
+
+================================================================================
+PARTIE 1 : C'EST QUOI CE PROJET ? 🎵
+================================================================================
+
+IMAGINE UN MAGASIN DE DISQUES VINYLES
+--------------------------------------
+
+Tu as un site web qui montre des vinyles d'artistes.
+Quand tu passes la souris sur un vinyle → il tourne et joue de la musique
+Quand tu cliques → tu vois les infos de l'artiste (membres, dates, lieux)
+
+
+MAIS D'OÙ VIENNENT LES DONNÉES ?
+---------------------------------
+
+Les infos des artistes sont sur un AUTRE SITE (une API externe)
+→ Comme si les infos étaient dans un autre magasin
+
+PROBLÈME : Ton navigateur (Chrome, Firefox) refuse d'aller chercher là-bas
+→ C'est une règle de sécurité appelée "CORS"
+
+SOLUTION : On crée un SERVEUR GO qui joue le rôle de "livreur"
+→ Il va chercher les infos pour toi et te les donne
+
+
+ANALOGIE SIMPLE
+---------------
+
+TOI (navigateur)  →  demande à  →  SERVEUR GO  →  qui demande à  →  API EXTERNE
+                                      ↓
+                                  renvoie tout
+                                      ↓
+TOI (navigateur)  ←  reçoit les données
+
+C'est comme commander sur Amazon : tu ne vas pas chercher toi-même au dépôt,
+Amazon livre pour toi !
+
+
+LES FICHIERS DU PROJET
+-----------------------
+
+main.go              → Le "livreur" qui récupère les données
+index.html           → La page que tu vois dans le navigateur
+ui.js                → Le code qui fait tourner les vinyles
+search.js            → Le code qui permet de chercher un artiste
+geoloc.js            → Le code qui affiche la carte avec les concerts
+style.css            → Le code qui rend tout joli (couleurs, formes)
+
+
+================================================================================
+PARTIE 2 : LE SERVEUR GO (main.go) - LIGNE PAR LIGNE 🚀
+================================================================================
+
+ON VA DÉCORTIQUER LA FONCTION LA PLUS IMPORTANTE : proxyAPI()
+
+
+ÉTAPE 1 : LA DÉFINITION DE LA FONCTION
+---------------------------------------
+
+func proxyAPI(targetURL string) http.HandlerFunc {
+
+TRADUCTION EN FRANÇAIS :
+→ "func" = je crée une fonction
+→ "proxyAPI" = son nom est "proxyAPI"
+→ "(targetURL string)" = elle prend un paramètre appelé "targetURL" qui est du texte
+→ "http.HandlerFunc" = elle retourne une fonction qui gère des requêtes HTTP
+
+ANALOGIE :
+C'est comme dire "Je crée une recette de cuisine appelée 'faire un gâteau',
+qui prend comme ingrédient 'type de farine', et qui retourne les instructions"
+
+
+ÉTAPE 2 : RETOURNER UNE FONCTION
+---------------------------------
+
+    return func(w http.ResponseWriter, r *http.Request) {
+
+TRADUCTION :
+→ "return func" = je retourne une nouvelle fonction
+→ "w http.ResponseWriter" = "w" est l'outil pour écrire la réponse au navigateur
+→ "r *http.Request" = "r" contient les infos de la demande du navigateur
+
+ANALOGIE :
+"w" = ton stylo pour écrire une lettre de réponse
+"r" = la lettre que tu as reçue avec la question
+
+
+ÉTAPE 3 : ALLER CHERCHER LES DONNÉES
+-------------------------------------
+
+        resp, err := http.Get(targetURL)
+
+TRADUCTION LIGNE PAR LIGNE :
+→ "resp" = la réponse qu'on va recevoir
+→ "err" = si quelque chose se passe mal, l'erreur sera ici
+→ ":=" = créer une nouvelle variable et lui donner une valeur
+→ "http.Get(targetURL)" = faire une demande GET vers l'URL qu'on a donnée
+
+ANALOGIE :
+Tu appelles un ami au téléphone (http.Get)
+→ "resp" = ce qu'il te répond
+→ "err" = s'il ne répond pas ou si la ligne coupe
+
+
+ÉTAPE 4 : VÉRIFIER S'IL Y A UNE ERREUR
+---------------------------------------
+
+        if err != nil {
+            http.Error(w, "API unavailable", http.StatusServiceUnavailable)
+            return
+        }
+
+TRADUCTION LIGNE PAR LIGNE :
+→ "if err != nil" = si "err" n'est PAS vide (donc il y a une erreur)
+→ "http.Error(w, ...)" = écrire un message d'erreur au navigateur
+→ "API unavailable" = le message d'erreur
+→ "http.StatusServiceUnavailable" = code d'erreur 503
+→ "return" = arrêter la fonction ici
+
+ANALOGIE :
+Si ton ami ne répond pas au téléphone,
+tu dis à la personne qui t'a demandé d'appeler :
+"Désolé, il n'est pas disponible"
+
+
+ÉTAPE 5 : FERMER LA CONNEXION PROPREMENT
+-----------------------------------------
+
+        defer resp.Body.Close()
+
+TRADUCTION :
+→ "defer" = "attends de faire ça à la fin"
+→ "resp.Body.Close()" = fermer la connexion
+
+ANALOGIE :
+Comme quand tu dis "n'oublie pas de fermer la porte en partant"
+Le "defer" garantit que la porte sera fermée, peu importe ce qui se passe
+
+
+ÉTAPE 6 : COPIER LES INFORMATIONS (HEADERS)
+--------------------------------------------
+
+        for key, values := range resp.Header {
+            for _, value := range values {
+                w.Header().Add(key, value)
+            }
+        }
+
+TRADUCTION LIGNE PAR LIGNE :
+→ "for key, values := range resp.Header" = pour chaque information dans la réponse
+→ "key" = le nom de l'info (exemple : "Content-Type")
+→ "values" = les valeurs associées
+→ "for _, value := range values" = pour chaque valeur
+→ "w.Header().Add(key, value)" = ajouter cette info à notre réponse
+
+ANALOGIE :
+Tu reçois un colis avec des étiquettes dessus
+Tu copies toutes les étiquettes sur le nouveau colis que tu vas envoyer
+Exemples d'étiquettes : "Fragile", "Urgent", "Poids: 2kg"
+
+
+ÉTAPE 7 : AJOUTER LA PERMISSION CORS
+-------------------------------------
+
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Content-Type", "application/json")
+
+TRADUCTION :
+→ "w.Header().Set(...)" = définir une information dans la réponse
+→ "Access-Control-Allow-Origin", "*" = autoriser TOUS les sites à lire cette réponse
+→ "Content-Type", "application/json" = le contenu est du format JSON
+
+ANALOGIE :
+Sur ton colis, tu ajoutes une étiquette spéciale qui dit :
+"Tout le monde peut ouvrir ce colis" (Access-Control-Allow-Origin)
+"Contenu : données JSON" (Content-Type)
+
+
+ÉTAPE 8 : COPIER LE CONTENU
+----------------------------
+
+        w.WriteHeader(resp.StatusCode)
+        io.Copy(w, resp.Body)
+
+TRADUCTION :
+→ "w.WriteHeader(resp.StatusCode)" = copier le code de statut (200 OK, 404 Not Found, etc.)
+→ "io.Copy(w, resp.Body)" = copier tout le contenu de la réponse
+
+ANALOGIE :
+Tu écris sur l'enveloppe : "Statut : OK" (ou "Erreur")
+Puis tu copies le contenu de la lettre que tu as reçue dans ta nouvelle lettre
+
+
+RÉSUMÉ DE TOUTE LA FONCTION proxyAPI
+-------------------------------------
+
+EN 8 ÉTAPES SIMPLES :
+1. On définit une fonction qui prend une URL
+2. On retourne une fonction qui va gérer les requêtes
+3. On va chercher les données à l'URL donnée
+4. Si erreur → on dit "pas dispo" et on arrête
+5. On prépare la fermeture de la connexion
+6. On copie toutes les infos (headers) de la réponse
+7. On ajoute la permission CORS (pour éviter les blocages)
+8. On copie le contenu JSON et on l'envoie au navigateur
+
+SCHÉMA ASCII :
+
+Navigateur  →  [Demande /api/artists-proxy]  →  Serveur Go
+                                                      ↓
+                                           [http.Get vers API externe]
+                                                      ↓
+                                           [Reçoit JSON des artistes]
+                                                      ↓
+                                           [Ajoute header CORS]
+                                                      ↓
+Navigateur  ←  [Reçoit JSON sans blocage]  ←  Serveur Go
+
+func proxyAPI(targetURL string) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        // 1. Faire une requête GET vers l'API externe
+        resp, err := http.Get(targetURL)
+        
+        // 2. Si erreur, renvoyer code 503
+        if err != nil {
+            http.Error(w, "API unavailable", http.StatusServiceUnavailable)
+            return
+        }
+        defer resp.Body.Close()
+        
+        // 3. Copier les headers de l'API vers notre réponse
+        for key, values := range resp.Header {
+            for _, value := range values {
+                w.Header().Add(key, value)
+            }
+        }
+        
+        // 4. IMPORTANT : Ajouter le header CORS pour autoriser tous les domaines
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Content-Type", "application/json")
+        
+        // 5. Copier le statut HTTP et le contenu JSON
+        w.WriteHeader(resp.StatusCode)
+        io.Copy(w, resp.Body)
+    }
+}
+
+EXPLICATION SIMPLE :
+- targetURL = URL de l'API externe (ex: https://groupietrackers.../api/artists)
+- http.HandlerFunc = fonction qui traite une requête HTTP
+- Le proxy agit comme un "intermédiaire" entre le navigateur et l'API externe
+- Il ajoute "Access-Control-Allow-Origin: *" pour autoriser le JavaScript
+
+B) ROUTES PROXY API
+-------------------
+
+// Route pour récupérer la liste des artistes
+http.HandleFunc("/api/artists-proxy", 
+    proxyAPI("https://groupietrackers.herokuapp.com/api/artists"))
+
+COMMENT ÇA MARCHE ?
+1. Le JavaScript fait : fetch('/api/artists-proxy')
+2. Le serveur Go reçoit la requête
+3. Go fait une vraie requête vers l'API externe
+4. Go renvoie le JSON au JavaScript
+5. JavaScript peut l'utiliser sans erreur CORS
+
+C) ROUTE AUDIO PROXY - CAS SPÉCIAL
+-----------------------------------
+
+http.HandleFunc("/api/audio-proxy", func(w http.ResponseWriter, r *http.Request) {
+    // 1. Récupérer l'URL de l'audio depuis le paramètre ?url=...
+    url := r.URL.Query().Get("url")
+    if url == "" {
+        http.Error(w, "missing url", http.StatusBadRequest)
+        return
+    }
+    
+    // 2. Créer une requête avec un User-Agent (certaines APIs l'exigent)
+    req, _ := http.NewRequest(http.MethodGet, url, nil)
+    req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; GroupieProxy/1.0)")
+    
+    // 3. Faire la requête et copier l'audio
+    resp, _ := http.DefaultClient.Do(req)
+    defer resp.Body.Close()
+    
+    // 4. Définir le type de contenu (audio MP3)
+    w.Header().Set("Content-Type", "audio/mpeg")
+    w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.WriteHeader(resp.StatusCode)
+    io.Copy(w, resp.Body)
+})
+
+POURQUOI CE PROXY AUDIO ?
+- iTunes/Deezer bloquent les requêtes directes depuis le navigateur
+- Le proxy Go se fait passer pour un navigateur (User-Agent)
+- Le navigateur peut ensuite lire l'audio sans blocage
+
+D) ROUTES HTML - SERVIR LES FICHIERS
+-------------------------------------
+
+// Page d'accueil
+http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    if r.URL.Path != "/" {
+        http.NotFound(w, r)
+        return
+    }
+    http.ServeFile(w, r, "index.html")
+})
+
+// Fichiers statiques (CSS, JS, images)
+fs := http.FileServer(http.Dir(filepath.Join("web", "static")))
+http.Handle("/static/", http.StripPrefix("/static/", fs))
+
+EXPLICATION :
+- http.ServeFile = envoyer un fichier HTML au navigateur
+- http.FileServer = servir tout un dossier de fichiers
+- StripPrefix = retirer "/static/" du chemin pour chercher dans "web/static/"
+
+
+================================================================================
+PARTIE 3 : FRONTEND JAVASCRIPT - ARCHITECTURE (15 MIN)
+================================================================================
+
+FICHIER : web/static/js/ui.js (1255 lignes)
+--------------------------------------------
+
+A) MODULE 1 : NAVIGATION MOBILE (lignes 1-150)
+-----------------------------------------------
+
+CONCEPT : Menu hamburger qui apparaît sur mobile (<700px)
+
+// 1. Créer le bouton hamburger dynamiquement
+var toggle = document.createElement('button');
+toggle.id = 'menuToggle';
+toggle.textContent = '\u2630'; // ☰ (icône hamburger)
+toggle.setAttribute('aria-expanded','false'); // Accessibilité
+
+// 2. Fonction qui adapte l'affichage selon la taille d'écran
+function updateNavVisibility() {
+    if (window.innerWidth < 700) {
+        // MOBILE : cacher le menu par défaut
+        nav.style.display = 'none';
+    } else {
+        // DESKTOP : afficher le menu en horizontal
+        nav.style.display = 'flex';
+    }
+}
+
+// 3. Basculer l'état du menu au clic
+toggle.addEventListener('click', function () {
+    var showing = nav.style.display !== 'none';
+    if (showing) {
+        nav.style.display = 'none'; // Fermer
+        toggle.setAttribute('aria-expanded','false');
+    } else {
+        nav.style.display = 'flex'; // Ouvrir
+        toggle.setAttribute('aria-expanded','true');
+    }
+});
+
+POINTS CLÉS :
+- window.innerWidth = largeur de la fenêtre en pixels
+- aria-expanded = attribut pour les lecteurs d'écran (accessibilité)
+- addEventListener('click') = détecter un clic
+- display: 'none' = cacher, display: 'flex' = afficher
+
+B) MODULE 2 : VINYLES ANIMÉS (lignes 151-1050)
+-----------------------------------------------
+
+CONCEPT : Charger des artistes et les afficher sous forme de vinyles cliquables
+
+ÉTAPE 1 : CHARGER LES DONNÉES
+------------------------------
+
+async function fetchArtists() {
+    // Helper pour fetch JSON avec vérification erreur
+    async function fetchJson(url) {
+        const res = await fetch(url, {cache: 'no-store'});
+        if (!res.ok) throw new Error('API response ' + res.status);
+        return res.json();
+    }
+    
+    let data;
+    try {
+        // Essayer le proxy local en premier
+        data = await fetchJson('/api/artists-proxy');
+    } catch (err) {
+        // Si échec, essayer l'API distante directement
+        try {
+            data = await fetchJson('https://groupietrackers.herokuapp.com/api/artists');
+        } catch (fallbackErr) {
+            // Si double échec, utiliser des artistes de démo
+            return SAMPLE_ARTISTS;
+        }
+    }
+    return Array.isArray(data) ? data : (data.artists || []);
+}
+
+CONCEPTS :
+- async/await = attendre une réponse asynchrone
+- fetch() = faire une requête HTTP
+- res.json() = convertir la réponse en objet JavaScript
+- try/catch = gérer les erreurs
+- Fallback = solution de secours
+
+ÉTAPE 2 : CRÉER UNE CARTE VINYLE
+---------------------------------
+
+function createVinylCard(artist) {
+    // 1. Créer le conteneur principal
+    const card = document.createElement('div');
+    card.className = 'vinyl-card';
+    
+    // 2. Créer le cadre du vinyle
+    const frame = document.createElement('div');
+    frame.className = 'vinyl-frame';
+    frame.dataset.artistId = artist.id;
+    
+    // 3. Ajouter l'image de l'artiste
+    const cover = document.createElement('img');
+    cover.src = artist.image || '/static/images/vinyle.png';
+    cover.alt = artist.name;
+    cover.className = 'vinyl-cover';
+    
+    // 4. Créer le disque vinyle (animation rotation)
+    const disc = document.createElement('div');
+    disc.className = 'vinyl-disc';
+    disc.textContent = '🎵';
+    
+    // 5. Assembler les éléments
+    frame.appendChild(cover);
+    frame.appendChild(disc);
+    card.appendChild(frame);
+    
+    // 6. ÉVÉNEMENT SURVOL : Jouer l'audio
+    frame.addEventListener('mouseenter', () => {
+        frame.classList.add('playing'); // Ajoute animation CSS
+        playArtistPreview(artist.id, artist.name);
+    });
+    
+    frame.addEventListener('mouseleave', () => {
+        frame.classList.remove('playing'); // Retire animation
+        if (currentAudio) currentAudio.pause();
+    });
+    
+    // 7. ÉVÉNEMENT CLIC : Ouvrir le modal
+    card.addEventListener('click', () => {
+        showArtistModal(artist);
+    });
+    
+    return card;
+}
+
+CONCEPTS :
+- document.createElement('div') = créer un élément HTML
+- element.className = définir une classe CSS
+- dataset.artistId = attribut data-* personnalisé
+- appendChild() = ajouter un élément enfant
+- addEventListener('mouseenter') = détecter le survol
+- classList.add('playing') = ajouter une classe CSS (animation)
+
+ÉTAPE 3 : JOUER UN APERÇU AUDIO
+--------------------------------
+
+async function playArtistPreview(artistId, artistName) {
+    // 1. Stopper l'audio précédent (un seul vinyle joue à la fois)
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+    }
+    if (currentFrame) {
+        currentFrame.classList.remove('playing');
+    }
+    
+    let previewUrl = null;
+    
+    // 2. STRATÉGIE 1 : Chercher sur iTunes
+    try {
+        const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&entity=song&limit=1`;
+        const res = await fetch(itunesUrl);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+            previewUrl = data.results[0].previewUrl;
+        }
+    } catch (err) {
+        console.log('iTunes search failed, trying Deezer');
+    }
+    
+    // 3. STRATÉGIE 2 : Si iTunes échoue, chercher sur Deezer
+    if (!previewUrl) {
+        try {
+            const deezerUrl = `https://api.deezer.com/search?q=${encodeURIComponent(artistName)}&limit=1`;
+            const res = await fetch(deezerUrl);
+            const data = await res.json();
+            if (data.data && data.data.length > 0) {
+                previewUrl = data.data[0].preview;
+            }
+        } catch (err) {
+            console.log('Deezer search failed');
+        }
+    }
+    
+    // 4. STRATÉGIE 3 : Si tout échoue, utiliser un MP3 de secours
+    if (!previewUrl) {
+        previewUrl = FALLBACK_PREVIEW;
+    }
+    
+    // 5. Utiliser le proxy audio pour éviter CORS
+    const proxiedUrl = `/api/audio-proxy?url=${encodeURIComponent(previewUrl)}`;
+    
+    // 6. Créer un lecteur audio et jouer
+    const audio = new Audio(proxiedUrl);
+    audio.volume = 0.3; // Volume à 30%
+    audio.play().catch(err => console.log('Audio play failed:', err));
+    
+    // 7. Mémoriser l'audio et le frame pour les arrêter plus tard
+    currentAudio = audio;
+    currentFrame = document.querySelector(`.vinyl-frame[data-artist-id="${artistId}"]`);
+}
+
+CONCEPTS :
+- encodeURIComponent() = encoder une URL (espaces, accents)
+- new Audio(url) = créer un lecteur audio
+- audio.play() = lancer la lecture
+- .catch() = gérer les erreurs de Promise
+- Proxy audio = passer par le serveur Go pour éviter CORS
+
+
+================================================================================
+PARTIE 4 : FONCTIONNALITÉS AVANCÉES (20 MIN)
+================================================================================
+
+FICHIER : web/static/js/search.js (420 lignes)
+-----------------------------------------------
+
+A) RECHERCHE AVEC SUGGESTIONS EN TEMPS RÉEL
+--------------------------------------------
+
+// 1. Charger les données au premier appel
+let allArtists = []; // Cache global
+async function ensureData() {
+    if (allArtists.length) return allArtists; // Déjà chargé
+    
+    // Charger depuis le proxy
+    const resp = await fetch('/api/artists-proxy');
+    const data = await resp.json();
+    allArtists = Array.isArray(data) ? data : (data.artists || []);
+    return allArtists;
+}
+
+// 2. Afficher des suggestions pendant la saisie
+function showSuggestions(query) {
+    const artists = allArtists.filter(a => 
+        (a.name || '').toLowerCase().includes(query.toLowerCase())
+    );
+    
+    // Limiter à 5 suggestions
+    const limited = artists.slice(0, 5);
+    
+    // Créer les boutons de suggestion
+    suggestionsEl.innerHTML = '';
+    limited.forEach(artist => {
+        const btn = document.createElement('button');
+        btn.className = 'suggestion-item';
+        btn.textContent = artist.name;
+        
+        // Clic sur suggestion = remplir le champ et rechercher
+        btn.addEventListener('click', () => {
+            input.value = artist.name;
+            form.dispatchEvent(new Event('submit'));
+        });
+        
+        suggestionsEl.appendChild(btn);
+    });
+}
+
+// 3. Écouter la saisie dans le champ de recherche
+input.addEventListener('input', () => {
+    const val = input.value.trim();
+    if (!val) {
+        suggestionsEl.innerHTML = ''; // Vider si champ vide
+        return;
+    }
+    showSuggestions(val);
+});
+
+CONCEPTS :
+- array.filter() = filtrer un tableau selon une condition
+- string.toLowerCase() = convertir en minuscules (recherche insensible casse)
+- string.includes() = vérifier si une chaîne contient une autre
+- array.slice(0, 5) = extraire les 5 premiers éléments
+- innerHTML = modifier le contenu HTML d'un élément
+- trim() = retirer les espaces avant/après
+
+B) FILTRES RAPIDES (CHIPS)
+---------------------------
+
+let activeFilter = null; // null = aucun filtre actif
+
+// Fonction qui teste si un artiste correspond au filtre
+function filterByBadge(artist, filterId) {
+    if (!filterId) return true; // Pas de filtre = tout afficher
+    
+    const name = (artist.name || '').toLowerCase();
+    const creation = Number(artist.creationDate || 0);
+    
+    switch (filterId) {
+        case 'rock':
+            // Tester si le nom contient "rock", "metal", "punk", etc.
+            return /rock|metal|punk|roll/.test(name);
+            
+        case 'seventies':
+            // Artiste créé dans les années 70
+            return (creation >= 1970 && creation < 1980);
+            
+        case 'usa':
+            // Tester si la localisation contient "usa", "california", etc.
+            const location = (artist.location || '').toLowerCase();
+            return /(usa|united states|california)/.test(location);
+            
+        default:
+            return true;
+    }
+}
+
+// Gestion du clic sur un chip
+document.querySelectorAll('.search-filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        if (chip.classList.contains('active')) {
+            // Si déjà actif, désactiver
+            chip.classList.remove('active');
+            activeFilter = null;
+        } else {
+            // Activer ce chip et désactiver les autres
+            document.querySelectorAll('.search-filter-chip').forEach(c => 
+                c.classList.remove('active')
+            );
+            chip.classList.add('active');
+            activeFilter = chip.dataset.filter;
+        }
+        
+        // Relancer la recherche avec le nouveau filtre
+        form.dispatchEvent(new Event('submit'));
+    });
+});
+
+CONCEPTS :
+- Regex /pattern/ = expression régulière pour tester un motif
+- switch/case = tester plusieurs valeurs possibles
+- querySelectorAll() = sélectionner tous les éléments correspondants
+- forEach() = boucler sur chaque élément
+- classList.contains() = vérifier si une classe existe
+- dataset.filter = lire l'attribut data-filter
+
+
+FICHIER : web/static/js/geoloc.js (166 lignes)
+-----------------------------------------------
+
+A) INITIALISATION DE LA CARTE LEAFLET
+--------------------------------------
+
+// 1. Créer une carte centrée sur le monde
+const map = L.map('map');
+map.setView([20, 0], 2); // Latitude 20, Longitude 0, Zoom 2
+
+// 2. Ajouter les tuiles OpenStreetMap (fond de carte)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 18,
+}).addTo(map);
+
+CONCEPTS :
+- L.map('map') = créer une carte Leaflet dans l'élément #map
+- setView([lat, lon], zoom) = définir la vue initiale
+- L.tileLayer() = charger les tuiles de carte (images)
+- addTo(map) = ajouter la couche à la carte
+
+B) GÉOCODAGE AVEC NOMINATIM + CACHE
+------------------------------------
+
+// Cache localStorage pour éviter de géocoder deux fois le même lieu
+const cacheKey = (loc) => `geocode:${loc.toLowerCase()}`;
+
+async function geocodeLocation(loc) {
+    // 1. Vérifier si déjà en cache
+    const key = cacheKey(loc);
+    const cached = localStorage.getItem(key);
+    if (cached) {
+        try {
+            return JSON.parse(cached); // {lat: X, lon: Y}
+        } catch {}
+    }
+    
+    // 2. Faire une requête vers Nominatim (géocodeur OpenStreetMap)
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(loc)}`;
+    const res = await fetch(url, {
+        headers: { 'Accept-Language': 'fr' }, // Résultats en français
+    });
+    
+    // 3. Parser la réponse
+    const arr = await res.json();
+    if (!Array.isArray(arr) || arr.length === 0) return null;
+    
+    // 4. Prendre le premier résultat
+    const best = arr[0];
+    const point = { lat: parseFloat(best.lat), lon: parseFloat(best.lon) };
+    
+    // 5. Sauvegarder dans le cache
+    localStorage.setItem(key, JSON.stringify(point));
+    
+    // 6. Attendre 250ms pour respecter la limite de Nominatim (1 req/sec)
+    await sleep(250);
+    
+    return point;
+}
+
+CONCEPTS :
+- localStorage = stockage persistant dans le navigateur
+- JSON.parse() = convertir une chaîne JSON en objet
+- JSON.stringify() = convertir un objet en chaîne JSON
+- parseFloat() = convertir une chaîne en nombre décimal
+- sleep(ms) = attendre un délai (politesse avec l'API)
+
+C) PLACER DES MARQUEURS SUR LA CARTE
+-------------------------------------
+
+async function main() {
+    // 1. Charger les données (artistes + relations)
+    const { relationByLocation } = await buildData();
+    
+    const bounds = []; // Pour ajuster la vue
+    
+    // 2. Pour chaque lieu, géocoder et placer un marqueur
+    for (const [loc, bucket] of relationByLocation.entries()) {
+        try {
+            // Géocoder le lieu
+            const pt = await geocodeLocation(loc);
+            if (!pt) continue; // Pas trouvé, passer au suivant
+            
+            // Créer un marqueur Leaflet
+            const marker = L.marker([pt.lat, pt.lon]).addTo(map);
+            
+            // Créer un popup avec HTML personnalisé
+            marker.bindPopup(popupHtml(bucket));
+            
+            // Ajouter les coordonnées pour ajuster la vue
+            bounds.push([pt.lat, pt.lon]);
+            
+        } catch (e) {
+            console.error('Failed to geocode:', loc, e);
+        }
+    }
+    
+    // 3. Ajuster la vue de la carte pour voir tous les marqueurs
+    if (bounds.length) {
+        const b = L.latLngBounds(bounds);
+        map.fitBounds(b.pad(0.2)); // Padding 20% pour aérer
+    }
+}
+
+CONCEPTS :
+- Map.entries() = boucler sur une Map (clé, valeur)
+- L.marker([lat, lon]) = créer un marqueur
+- marker.bindPopup(html) = associer un popup au marqueur
+- L.latLngBounds(bounds) = créer une zone englobante
+- map.fitBounds() = ajuster la vue pour voir toute la zone
+
+
+FICHIER : web/static/js/subscription.js (232 lignes)
+-----------------------------------------------------
+
+A) VALIDATION DE CARTE BANCAIRE (SIMULATION)
+---------------------------------------------
+
+function validateCardNumber(cardNumber) {
+    // 1. Nettoyer les espaces et tirets
+    const cleaned = cardNumber.replace(/[\s-]/g, '');
+    
+    // 2. Vérifier la longueur (13-19 chiffres)
+    if (cleaned.length < 13 || cleaned.length > 19) return false;
+    
+    // 3. Vérifier que ce sont bien des chiffres
+    if (!/^\d+$/.test(cleaned)) return false;
+    
+    return true;
+}
+
+function validateExpiryDate(expiryDate) {
+    // Format attendu : MM/YY ou MM/YYYY
+    const parts = expiryDate.split('/');
+    if (parts.length !== 2) return false;
+    
+    const month = parseInt(parts[0], 10);
+    let year = parseInt(parts[1], 10);
+    
+    // Convertir YY en YYYY
+    if (year < 100) year += 2000;
+    
+    // Vérifier mois valide
+    if (month < 1 || month > 12) return false;
+    
+    // Vérifier que la date n'est pas expirée
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    
+    if (year < currentYear) return false;
+    if (year === currentYear && month < currentMonth) return false;
+    
+    return true;
+}
+
+CONCEPTS :
+- string.replace(/regex/g, '') = remplacer avec regex
+- /^\d+$/ = regex qui teste "que des chiffres"
+- parseInt(str, 10) = convertir une chaîne en nombre entier
+- new Date() = obtenir la date actuelle
+- getFullYear() = obtenir l'année (2026)
+- getMonth() = obtenir le mois (0-11, donc +1)
+
+B) FORMATAGE AUTOMATIQUE DU NUMÉRO DE CARTE
+--------------------------------------------
+
+// Écouter la saisie dans le champ carte
+document.getElementById('cardNumber').addEventListener('input', (e) => {
+    let value = e.target.value;
+    
+    // 1. Retirer tous les espaces
+    value = value.replace(/\s/g, '');
+    
+    // 2. Diviser en groupes de 4 chiffres
+    const groups = value.match(/.{1,4}/g);
+    
+    // 3. Rejoindre avec des espaces
+    if (groups) {
+        e.target.value = groups.join(' ');
+    }
+});
+
+EXPLICATION :
+- Input : "1234567890123456"
+- Après replace : "1234567890123456"
+- Après match : ["1234", "5678", "9012", "3456"]
+- Après join : "1234 5678 9012 3456"
+
+C) SIMULATION DE PAIEMENT AVEC DÉLAI
+-------------------------------------
+
+cardForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    // 1. Valider les champs
+    if (!validateCardNumber(cardNumber)) {
+        showError('Numéro de carte invalide');
+        return;
+    }
+    
+    if (!validateExpiryDate(expiryDate)) {
+        showError('Date d\'expiration invalide');
+        return;
+    }
+    
+    // 2. Afficher un message de traitement
+    showMessage('Traitement en cours...');
+    
+    // 3. Simuler un délai de traitement (2 secondes)
+    setTimeout(() => {
+        // 4. Sauvegarder dans localStorage
+        localStorage.setItem('subscription', JSON.stringify({
+            plan: selectedPlan,
+            price: selectedPrice,
+            planName: selectedPlanName,
+            date: new Date().toISOString()
+        }));
+        
+        // 5. Afficher le message de succès
+        showSuccessMessage();
+        
+        // 6. Réinitialiser le formulaire
+        cardForm.reset();
+    }, 2000);
+});
+
+CONCEPTS :
+- e.preventDefault() = empêcher le rechargement de page
+- setTimeout(callback, ms) = exécuter après un délai
+- toISOString() = convertir Date en format ISO (2026-01-23T14:30:00.000Z)
+
+
+================================================================================
+PARTIE 5 : FLUX DE DONNÉES ET INTERACTIONS (10 MIN)
+================================================================================
+
+A) CYCLE DE VIE D'UNE REQUÊTE API
+----------------------------------
+
+1. UTILISATEUR charge la page index.html
+   ↓
+2. NAVIGATEUR télécharge ui.js
+   ↓
+3. JAVASCRIPT exécute DOMContentLoaded
+   ↓
+4. JAVASCRIPT appelle fetchArtists()
+   ↓
+5. JAVASCRIPT fait : fetch('/api/artists-proxy')
+   ↓
+6. SERVEUR GO reçoit la requête sur /api/artists-proxy
+   ↓
+7. GO fait : http.Get('https://groupietrackers.herokuapp.com/api/artists')
+   ↓
+8. API EXTERNE renvoie du JSON à Go
+   ↓
+9. GO ajoute les headers CORS et renvoie le JSON au JavaScript
+   ↓
+10. JAVASCRIPT reçoit les données et crée les vinyles
+   ↓
+11. NAVIGATEUR affiche les vinyles à l'utilisateur
+
+B) CYCLE D'INTERACTION UTILISATEUR
+-----------------------------------
+
+SCÉNARIO 1 : Survol d'un vinyle
+-------------------------------
+1. Souris entre dans la zone du vinyle (mouseenter)
+2. JavaScript ajoute la classe .playing
+3. CSS anime la rotation (keyframes spin)
+4. JavaScript appelle playArtistPreview()
+5. Recherche iTunes → Deezer → Fallback
+6. JavaScript crée un <audio> et lance play()
+7. L'utilisateur entend la musique
+
+SCÉNARIO 2 : Recherche d'un artiste
+-----------------------------------
+1. Utilisateur tape "Queen" dans le champ
+2. JavaScript déclenche l'événement 'input'
+3. showSuggestions() filtre les artistes
+4. Affichage de suggestions (Queen, Queensrÿche, etc.)
+5. Utilisateur clique sur "Queen"
+6. JavaScript remplit le champ et soumet le formulaire
+7. renderResults() affiche les résultats filtrés
+8. Utilisateur clique sur une carte
+9. showModal() affiche les détails de l'artiste
+
+SCÉNARIO 3 : Géolocalisation
+----------------------------
+1. Utilisateur clique sur "Géolocalisation"
+2. Navigateur charge geoloc.html + geoloc.js
+3. JavaScript crée la carte Leaflet
+4. buildData() charge artistes + relations
+5. Pour chaque lieu :
+   a. Vérifier cache localStorage
+   b. Si absent, appeler Nominatim
+   c. Sauvegarder les coordonnées
+   d. Créer un marqueur Leaflet
+6. map.fitBounds() ajuste la vue
+7. Utilisateur voit tous les concerts sur la carte
+
+C) SYSTÈME DE CACHE - OPTIMISATION
+-----------------------------------
+
+CACHE 1 : localStorage pour géocodage
+-------------------------------------
+Clé : "geocode:usa-new_york"
+Valeur : {"lat":40.7128,"lon":-74.0060}
+Durée : Permanent (jusqu'à effacement manuel)
+Économie : ~90% des requêtes Nominatim
+
+CACHE 2 : Variables globales JavaScript
+---------------------------------------
+allArtists = [] (search.js)
+locationsData = null (ui.js)
+datesData = null (ui.js)
+relationsData = null (ui.js)
+Durée : Pendant la session (rafraîchissement page = perte)
+Économie : Évite de recharger les données à chaque action
+
+CACHE 3 : localStorage pour abonnement
+--------------------------------------
+Clé : "subscription"
+Valeur : {"plan":"pro","price":"19.99","date":"2026-01-23T..."}
+Durée : Permanent
+Utilité : Persistance de l'état d'abonnement
+
+
+================================================================================
+RÉSUMÉ FINAL - LES 10 CONCEPTS CLÉS À RETENIR
+================================================================================
+
+1. PROXY GO = Intermédiaire pour résoudre CORS
+   → Le serveur Go fait les requêtes à notre place
+   → Ajoute "Access-Control-Allow-Origin: *"
+
+2. ASYNC/AWAIT = Attendre des réponses asynchrones
+   → async function = fonction qui peut attendre
+   → await fetch() = attendre la réponse HTTP
+   → try/catch = gérer les erreurs
+
+3. FETCH API = Faire des requêtes HTTP en JavaScript
+   → fetch(url) = requête GET
+   → res.json() = parser JSON
+   → res.ok = vérifier statut HTTP
+
+4. DOM MANIPULATION = Créer/modifier HTML avec JavaScript
+   → document.createElement() = créer élément
+   → element.appendChild() = ajouter enfant
+   → element.innerHTML = modifier contenu
+
+5. EVENT LISTENERS = Réagir aux actions utilisateur
+   → addEventListener('click') = clic souris
+   → addEventListener('input') = saisie clavier
+   → addEventListener('mouseenter') = survol
+
+6. CSS CLASSES = Changer l'apparence dynamiquement
+   → classList.add('playing') = ajouter classe
+   → classList.remove('playing') = retirer classe
+   → classList.contains('active') = vérifier présence
+
+7. ARRAY METHODS = Manipuler des listes de données
+   → array.filter() = filtrer selon condition
+   → array.map() = transformer chaque élément
+   → array.forEach() = boucler sur chaque élément
+
+8. LOCALSTORAGE = Stockage persistant navigateur
+   → localStorage.setItem(key, value) = sauvegarder
+   → localStorage.getItem(key) = récupérer
+   → JSON.stringify() / JSON.parse() = convertir objets
+
+9. REGEX = Tester des motifs dans des chaînes
+   → /pattern/.test(string) = vérifier correspondance
+   → /rock|metal|punk/ = "ou" logique
+   → /^\d+$/ = que des chiffres
+
+10. LEAFLET MAP = Créer des cartes interactives
+    → L.map() = créer carte
+    → L.marker() = ajouter marqueur
+    → map.fitBounds() = ajuster vue
+
+
