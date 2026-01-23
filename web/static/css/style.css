@@ -272,6 +272,8 @@ body, p, li, a{color:var(--muted-strong)}
     opacity:1;
     animation:fadeUp 0.7s ease forwards;
 }
+
+.vinyl-frame{
     width:380px;
     height:380px;
     display:flex;
@@ -1270,5 +1272,4 @@ body, p, li, a{color:var(--muted-strong)}
         margin-left: 0;
         width: 100%;
     }
-}
 }
