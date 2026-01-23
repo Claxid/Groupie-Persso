@@ -896,12 +896,22 @@ document.addEventListener('DOMContentLoaded', function () {
 				}, 2500); // 2.5 seconds
 			});
 			
-			// Cancel timer on mouseleave
+			// Cancel timer on mouseleave and stop music
 			frame.addEventListener('mouseleave', function () {
 				console.log('🖱️ Mouse left vinyl for:', a.name);
 				if (hoverTimeout) {
 					clearTimeout(hoverTimeout);
 					hoverTimeout = null;
+				}
+				// Stop music if it's playing
+				if (isPlaying && currentAudio === audio) {
+					audio.pause();
+					audio.currentTime = 0;
+					isPlaying = false;
+					frame.classList.remove('playing');
+					currentAudio = null;
+					currentFrame = null;
+					console.log('⏹️ Music stopped for:', a.name);
 				}
 			});
 			
