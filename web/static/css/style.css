@@ -634,9 +634,38 @@ body, p, li, a{color:var(--muted-strong)}
 }
 
 /* Modal for artist details */
-.artist-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;visibility:hidden;opacity:0;transition:opacity .18s ease}
-.artist-modal.open{visibility:visible;opacity:1;background:rgba(0,0,0,0.45)}
-.artist-modal__panel{background:var(--bg-overlay);padding:18px;border-radius:12px;max-width:640px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.35)}
+.artist-modal {
+    position: fixed;
+    inset: 0;
+    display: none !important;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    visibility: hidden;
+    opacity: 0;
+    background: transparent;
+    transition: visibility 0.3s ease, opacity 0.3s ease, background 0.3s ease;
+    pointer-events: none;
+}
+
+.artist-modal.open {
+    display: flex !important;
+    visibility: visible;
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.45);
+    pointer-events: auto;
+}
+
+.artist-modal__panel {
+    background: var(--panel-strong);
+    padding: 20px;
+    border-radius: 14px;
+    max-width: 640px;
+    width: 90%;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(18px);
+}
 .artist-modal__content h2{margin-top:0;margin-bottom:6px}
 .vinyl-caption{font-size:25px;color:var(--muted);text-align:center;margin-top:0px}
 
@@ -655,10 +684,13 @@ body, p, li, a{color:var(--muted-strong)}
 .artist-links a:focus,
 .artist-links button:focus{outline:2px solid rgba(123,58,237,0.35);outline-offset:2px}
 
-/* keep modal content readable on small screens */
-@media(max-width:480px){
-    .artist-modal__hero{flex-direction:column;align-items:flex-start}
-    .artist-cover{width:100%;height:auto}
+/* Ensure artist modal children are hidden by default */
+.artist-modal * {
+    visibility: hidden;
+}
+
+.artist-modal.open * {
+    visibility: visible;
 }
 
 /* ===================== SUBSCRIPTION STYLES ===================== */
@@ -1031,7 +1063,7 @@ body, p, li, a{color:var(--muted-strong)}
     .auth-tab{padding:0.7rem 0.8rem;font-size:0.9rem}
 }
 
-/* Modal styling */
+/* Modal styling - default hidden */
 .modal {
     display: none !important;
     visibility: hidden;
@@ -1051,6 +1083,7 @@ body, p, li, a{color:var(--muted-strong)}
     transition: visibility 0.3s ease, opacity 0.3s ease;
 }
 
+/* Show modal only with .active or .open class */
 .modal.active,
 .modal.open {
     display: flex !important;
@@ -1059,6 +1092,16 @@ body, p, li, a{color:var(--muted-strong)}
     align-items: flex-start;
     justify-content: center;
     pointer-events: auto;
+}
+
+/* Ensure modal content doesn't leak */
+.modal * {
+    visibility: hidden;
+}
+
+.modal.active *,
+.modal.open * {
+    visibility: visible;
 }
 
 @keyframes fadeIn {
