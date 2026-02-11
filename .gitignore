@@ -1,0 +1,34 @@
+# Environnement
+.env
+.env.local
+.env*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+dist/
+bin/
+app
+*.exe
+*.exe~
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Dependencies
+vendor/
+
+# Build output
+/public/
+*.o
+*.a

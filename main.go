@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"groupiepersso/internal/core"
 )
 
 // proxyAPI fait un proxy HTTP simple vers une URL cible
@@ -35,6 +38,9 @@ func proxyAPI(targetURL string) http.HandlerFunc {
 }
 
 func main() {
+	// Charger la configuration depuis les variables d'environnement
+	cfg := core.LoadConfig()
+
 	// Route pour les fichiers statiques
 	fs := http.FileServer(http.Dir(filepath.Join("web", "static")))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -85,12 +91,12 @@ func main() {
 	})
 
 	// Routes API avec proxy
-	http.HandleFunc("/api/artists-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/artists"))
-	http.HandleFunc("/api/locations-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/locations"))
-	http.HandleFunc("/api/dates-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/dates"))
+	http.HandleFunc("/api/artists-proxy", proxyAPI(fmt.Sprintf("%s/artists", cfg.GroupieTrackerAPI)))
+	http.HandleFunc("/api/locations-proxy", proxyAPI(fmt.Sprintf("%s/locations", cfg.GroupieTrackerAPI)))
+	http.HandleFunc("/api/dates-proxy", proxyAPI(fmt.Sprintf("%s/dates", cfg.GroupieTrackerAPI)))
 	// Alias avec et sans 's' pour éviter les erreurs de route
-	http.HandleFunc("/api/relation-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/relation"))
-	http.HandleFunc("/api/relations-proxy", proxyAPI("https://groupietrackers.herokuapp.com/api/relation"))
+	http.HandleFunc("/api/relation-proxy", proxyAPI(fmt.Sprintf("%s/relation", cfg.GroupieTrackerAPI)))
+	http.HandleFunc("/api/relations-proxy", proxyAPI(fmt.Sprintf("%s/relation", cfg.GroupieTrackerAPI)))
 
 	// Route racine pour index.html
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -101,10 +107,7 @@ func main() {
 		http.ServeFile(w, r, "index.html")
 	})
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	port := cfg.Port
 	log.Printf("Starting server on :%s — open http://localhost:%s/", port, port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
