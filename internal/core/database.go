@@ -1,4 +1,4 @@
-package main
+package core
 
 // database.go - Configuration et initialisation de la base de données
 // Ce fichier gère la connexion à la base de données MySQL

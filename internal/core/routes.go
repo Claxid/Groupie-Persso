@@ -1,4 +1,4 @@
-package main
+package core
 
 // routes.go - Configuration des routes HTTP
 // Ce fichier configure les routes du serveur
