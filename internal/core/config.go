@@ -78,7 +78,10 @@ func (c *Config) GetDBConnectionString() string {
 	// Si DATABASE_URL est défini (Scalingo), l'utiliser directement
 	if c.DatabaseURL != "" {
 		log.Println("✅ Utilisation d'une URL PostgreSQL fournie par l'environnement")
-		return c.DatabaseURL
+		// Scalingo supporte : "require", "verify-full", "verify-ca", "disable"
+		// mais pas "prefer", donc on remplace
+		connStr := strings.ReplaceAll(c.DatabaseURL, "sslmode=prefer", "sslmode=require")
+		return connStr
 	}
 
 	// Sinon, construire à partir des variables individuelles

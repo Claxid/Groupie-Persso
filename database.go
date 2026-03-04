@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -27,6 +28,10 @@ func InitDatabase() {
 		fmt.Println("⚠️ Aucune DATABASE_URL détectée, favoris désactivés")
 		return
 	}
+	
+	// Scalingo supporte : "require", "verify-full", "verify-ca", "disable"
+	// mais pas "prefer", donc on remplace
+	dsn = strings.ReplaceAll(dsn, "sslmode=prefer", "sslmode=require")
 	
 	fmt.Println("✅ DATABASE_URL détectée")
 
