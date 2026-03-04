@@ -393,12 +393,18 @@ body, p, li, a{color:var(--muted-strong)}
 
 /* Modal for artist details */
 .artist-modal {
-    position: absolute;
-    inset: 0;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     display: none !important;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 99999;
+    padding: 24px;
+    overflow-y: auto;
+    box-sizing: border-box;
     visibility: hidden;
     opacity: 0;
     background: transparent;
@@ -414,7 +420,7 @@ body, p, li, a{color:var(--muted-strong)}
     pointer-events: auto;
 }
 
-.artist-modal__panel{background:var(--panel-strong);padding:20px;border-radius:14px;max-width:640px;width:90%;box-shadow:0 30px 80px rgba(0,0,0,0.45);border:1px solid var(--glass-border);backdrop-filter:blur(18px)}
+.artist-modal__panel{background:var(--panel-strong);padding:20px;border-radius:14px;max-width:640px;width:90%;box-shadow:0 30px 80px rgba(0,0,0,0.45);border:1px solid var(--glass-border);backdrop-filter:blur(18px);margin:auto}
 .artist-modal .artist-modal__close{
     position:absolute;
     right:12px;
@@ -636,11 +642,17 @@ body, p, li, a{color:var(--muted-strong)}
 /* Modal for artist details */
 .artist-modal {
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     display: none !important;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 99999;
+    padding: 24px;
+    overflow-y: auto;
+    box-sizing: border-box;
     visibility: hidden;
     opacity: 0;
     background: transparent;
@@ -668,6 +680,7 @@ body, p, li, a{color:var(--muted-strong)}
     border: 2px solid rgba(107, 114, 128, 0.5);
     backdrop-filter: blur(20px);
     position: relative;
+    margin: auto;
     animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
