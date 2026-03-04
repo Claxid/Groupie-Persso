@@ -393,7 +393,7 @@ body, p, li, a{color:var(--muted-strong)}
 
 /* Modal for artist details */
 .artist-modal {
-    position: fixed;
+    position: absolute;
     inset: 0;
     display: none !important;
     align-items: center;
