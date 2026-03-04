@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"html/template"
 	"log"
 	"net/http"
@@ -82,11 +83,16 @@ func favoritesPage(w http.ResponseWriter, r *http.Request) {
 		var artistID int
 		var artistName string
 		var artistImage string
-		var createdAt string
+		var createdAt sql.NullString
 
 		if err := rows.Scan(&id, &artistID, &artistName, &artistImage, &createdAt); err != nil {
 			log.Printf("❌ Erreur scan: %v", err)
 			continue
+		}
+
+		createdAtStr := ""
+		if createdAt.Valid {
+			createdAtStr = createdAt.String
 		}
 
 		favorites = append(favorites, map[string]interface{}{
@@ -94,7 +100,7 @@ func favoritesPage(w http.ResponseWriter, r *http.Request) {
 			"ArtistID":    artistID,
 			"ArtistName":  artistName,
 			"ArtistImage": artistImage,
-			"CreatedAt":   createdAt,
+			"CreatedAt":   createdAtStr,
 		})
 	}
 

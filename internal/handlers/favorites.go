@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -50,9 +51,13 @@ func GetFavorites(w http.ResponseWriter, r *http.Request) {
 	var favorites []models.Favorite
 	for rows.Next() {
 		var fav models.Favorite
-		if err := rows.Scan(&fav.ID, &fav.ArtistID, &fav.ArtistName, &fav.ArtistImage, &fav.CreatedAt); err != nil {
+		var createdAt sql.NullTime
+		if err := rows.Scan(&fav.ID, &fav.ArtistID, &fav.ArtistName, &fav.ArtistImage, &createdAt); err != nil {
 			log.Printf("Erreur lors du scan: %v", err)
 			continue
+		}
+		if createdAt.Valid {
+			fav.CreatedAt = createdAt.Time
 		}
 		favorites = append(favorites, fav)
 	}
@@ -81,12 +86,13 @@ func AddFavorite(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insérer le favori (UNIQUE constraint empêchera les doublons)
+	var createdAt sql.NullTime
 	err := database.DB.QueryRow(`
 		INSERT INTO favorites (artist_id, artist_name, artist_image) 
 		VALUES ($1, $2, $3)
 		ON CONFLICT (artist_id) DO NOTHING
 		RETURNING id, created_at
-	`, fav.ArtistID, fav.ArtistName, fav.ArtistImage).Scan(&fav.ID, &fav.CreatedAt)
+	`, fav.ArtistID, fav.ArtistName, fav.ArtistImage).Scan(&fav.ID, &createdAt)
 
 	if err != nil {
 		// Si aucune ligne retournée, c'est que l'artiste est déjà en favori
@@ -94,12 +100,16 @@ func AddFavorite(w http.ResponseWriter, r *http.Request) {
 		// On récupère quand même les infos existantes
 		err = database.DB.QueryRow(`
 			SELECT id, created_at FROM favorites WHERE artist_id = $1
-		`, fav.ArtistID).Scan(&fav.ID, &fav.CreatedAt)
+		`, fav.ArtistID).Scan(&fav.ID, &createdAt)
 
 		if err != nil {
 			http.Error(w, "Erreur serveur", http.StatusInternalServerError)
 			return
 		}
+	}
+
+	if createdAt.Valid {
+		fav.CreatedAt = createdAt.Time
 	}
 
 	w.Header().Set("Content-Type", "application/json")
