@@ -27,18 +27,21 @@ func InitDatabase() {
 		fmt.Println("⚠️ Aucune DATABASE_URL détectée, favoris désactivés")
 		return
 	}
+	
+	fmt.Println("✅ DATABASE_URL détectée")
 
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Println("❌ Erreur connexion PostgreSQL (GORM):", err)
+		fmt.Printf("❌ Erreur gorm.Open(): %v\n", err)
 		return
 	}
+	fmt.Println("✅ gorm.Open() réussi")
 
 	if err := DB.AutoMigrate(&Favorite{}); err != nil {
-		fmt.Println("❌ Erreur AutoMigrate Favorite:", err)
+		fmt.Printf("❌ Erreur AutoMigrate Favorite: %v\n", err)
 		return
 	}
-
-	fmt.Println("✅ Connexion GORM OK + AutoMigrate Favorite")
+	fmt.Println("✅ AutoMigrate Favorite réussi")
+	fmt.Println("✅ InitDatabase() COMPLÉTÉE AVEC SUCCÈS")
 }
