@@ -390,6 +390,7 @@ body, p, li, a{color:var(--muted-strong)}
     .vinyl-frame{width:240px;height:240px}
     .vinyl-cover{width:42%;height:42%}
     .vinyl-caption{font-size:1rem}
+}
 
 /* Modal for artist details */
 .artist-modal {
