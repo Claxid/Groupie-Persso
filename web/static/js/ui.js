@@ -312,6 +312,17 @@ document.addEventListener('DOMContentLoaded', function () {
 			caption.textContent = a.name || '';
 			item.appendChild(caption);
 
+			// Ajouter le bouton favori
+			if (window.favoriteManager) {
+				const favoriteBtn = window.favoriteManager.createFavoriteButton(
+					a.id, 
+					a.name || '', 
+					a.image || ''
+				);
+				favoriteBtn.className = 'favorite-btn vinyl-favorite-btn';
+				item.appendChild(favoriteBtn);
+			}
+
 			// Toggle play/pause music on click
 			let isPlaying = false;
 			let playAttempted = false;

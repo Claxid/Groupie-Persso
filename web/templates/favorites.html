@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mes Favoris - Groupie Tracker</title>
+    <meta name="description" content="Retrouvez tous vos artistes favoris" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <link rel="stylesheet" href="/static/css/search.css" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1>Groupie Tracker</h1>
+            <form id="headerSearch" class="header-search-form" action="/search.html" method="get">
+                <input type="search" name="q" placeholder="Rechercher un artiste..." aria-label="Recherche" class="header-search-input">
+                <button type="submit" class="btn header-search-btn">Recherche</button>
+            </form>
+            <nav class="main-nav" id="mainNav">
+                <a href="/">Accueil</a>
+                <a href="/geoloc.html">Géolocalisation</a>
+                <a href="/favorites.html" class="active">Favoris</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="search-hero">
+            <h2>❤️ Mes Artistes Favoris</h2>
+            <p>Retrouvez tous les artistes que vous avez ajoutés à vos favoris</p>
+        </section>
+
+        <div id="favorites-count" class="favorites-count"></div>
+        <div id="favorites-results" class="results-grid"></div>
+        <div id="no-favorites" class="no-favorites" style="display: none;">
+            <p>Vous n'avez pas encore d'artistes favoris.</p>
+            <p><a href="/search.html" class="btn">Rechercher des artistes</a></p>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">© Groupie Tracker — Projet fait par Preston, Clément et Timéo</div>
+    </footer>
+
+    <script src="/static/js/favorites.js"></script>
+</body>
+</html>

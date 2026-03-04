@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"groupie-tracker-localisation.netlify.app/m/internal/database"
+	"groupie-tracker-localisation.netlify.app/m/internal/handlers"
 )
 
 func main() {
@@ -15,6 +18,14 @@ func main() {
 			log.Fatalf("panic occurred: %v", r)
 		}
 	}()
+
+	// Initialisation de la base de données PostgreSQL
+	if err := database.InitDB(); err != nil {
+		log.Printf("⚠️ Avertissement: Impossible de se connecter à PostgreSQL: %v", err)
+		log.Println("Le serveur continuera sans fonctionnalités de favoris")
+	} else {
+		defer database.CloseDB()
+	}
 
 	// Get port from environment or default to 8080
 	port := os.Getenv("PORT")
@@ -57,6 +68,33 @@ func main() {
 	http.HandleFunc("/api/dates-proxy", proxy("https://groupietrackers.herokuapp.com/api/dates"))
 	http.HandleFunc("/api/relation-proxy", proxy("https://groupietrackers.herokuapp.com/api/relation"))
 	log.Println("API proxy routes registered")
+
+	// Routes API pour les favoris
+	http.HandleFunc("/api/favorites", func(w http.ResponseWriter, r *http.Request) {
+		// Support des options CORS
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		switch r.Method {
+		case http.MethodGet:
+			handlers.GetFavorites(w, r)
+		case http.MethodPost:
+			handlers.AddFavorite(w, r)
+		case http.MethodDelete:
+			handlers.RemoveFavorite(w, r)
+		default:
+			http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		}
+	})
+	
+	http.HandleFunc("/api/favorites/check", handlers.CheckFavorite)
+	log.Println("✅ Routes API favoris enregistrées")
 
 	// Serve static files from a single root: web/static
 	staticDir := filepath.Join("web", "static")
@@ -118,6 +156,10 @@ func main() {
 
 	http.HandleFunc("/geoloc.html", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "geoloc.html"))
+	})
+
+	http.HandleFunc("/favorites.html", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "favorites.html"))
 	})
 
 	addr := ":" + port

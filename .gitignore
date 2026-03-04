@@ -1,0 +1,36 @@
+# Binaires Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+groupie-tracker
+
+# Fichiers de test
+*.test
+*.out
+
+# Dépendances Go
+go.sum
+
+# Variables d'environnement (contient des données sensibles)
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Base de données locale
+*.db
+*.sqlite
+*.sqlite3

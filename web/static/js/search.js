@@ -101,6 +101,17 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 
 			card.appendChild(body);
+
+			// Ajouter le bouton favori
+			if (window.favoriteManager) {
+				const favoriteBtn = window.favoriteManager.createFavoriteButton(
+					artist.id,
+					artist.name || '',
+					imageUrl || ''
+				);
+				body.appendChild(favoriteBtn);
+			}
+
 			results.appendChild(card);
 
 			// micro fade-in
