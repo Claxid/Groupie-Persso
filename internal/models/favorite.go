@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 // Favorite représente un artiste favori
 type Favorite struct {
 	ID          int       `json:"id"`
