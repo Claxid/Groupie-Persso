@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"groupie-tracker-localisation.netlify.app/m/internal/database"
-	"groupie-tracker-localisation.netlify.app/m/internal/models"
+	"groupiepersso/internal/database"
+	"groupiepersso/internal/models"
 )
 
 // GetFavorites retourne tous les artistes favoris
