@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/joho/godotenv"
 	"groupiepersso/internal/core"
 	"groupiepersso/internal/database"
 	"groupiepersso/internal/handlers"
@@ -40,6 +41,9 @@ func proxyAPI(targetURL string) http.HandlerFunc {
 }
 
 func main() {
+	godotenv.Load()
+	InitDatabase()
+
 	// Charger la configuration depuis les variables d'environnement
 	cfg := core.LoadConfig()
 
@@ -173,6 +177,11 @@ func main() {
 
 	http.HandleFunc("/api/favorites/check", handlers.CheckFavorite)
 	log.Println("✅ Routes API favoris enregistrées")
+
+	// Routes favoris (package main)
+	http.HandleFunc("/favorites", favoritesPage)
+	http.HandleFunc("/favorites/add", addFavorite)
+	http.HandleFunc("/favorites/remove", removeFavorite)
 
 	// Route racine pour index.html
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

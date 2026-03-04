@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Favoris</title>
+</head>
+<body>
+    <h1>⭐ Mes Artistes Favoris</h1>
+    <a href="/">↩ Retour</a>
+
+    {{range .}}
+    <div class="favorite-card" style="margin:16px 0; padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <h2>{{.ArtistName}}</h2>
+        <form action="/favorites/remove" method="POST">
+            <input type="hidden" name="id" value="{{.ID}}">
+            <button type="submit">Supprimer</button>
+        </form>
+    </div>
+    {{else}}
+    <p>Aucun favori pour le moment.</p>
+    {{end}}
+</body>
+</html>

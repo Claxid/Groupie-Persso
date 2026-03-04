@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artiste</title>
+</head>
+<body>
+    <h1>{{.Name}}</h1>
+
+    <form action="/favorites/add" method="POST">
+        <input type="hidden" name="artist_id" value="{{.ID}}">
+        <input type="hidden" name="artist_name" value="{{.Name}}">
+        <button type="submit">⭐ Ajouter aux favoris</button>
+    </form>
+</body>
+</html>
