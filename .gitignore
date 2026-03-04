@@ -1,27 +1,7 @@
-<<<<<<< HEAD
-# Binaires Go
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-groupie-tracker
-
-# Fichiers de test
-*.test
-*.out
-
-# Dépendances Go
-go.sum
-
-# Variables d'environnement (contient des données sensibles)
-.env
-=======
 # Environnement
 .env
 .env.local
 .env*.local
->>>>>>> 8cf4160762db7d2b24d9fe400bfe933a6b4f26b7
 
 # IDE
 .vscode/
@@ -34,16 +14,7 @@ go.sum
 .DS_Store
 Thumbs.db
 
-<<<<<<< HEAD
-# Logs
-*.log
-
-# Base de données locale
-*.db
-*.sqlite
-*.sqlite3
-=======
-# Go
+# Go / binaires
 dist/
 bin/
 app
@@ -53,12 +24,18 @@ app
 *.so
 *.so.*
 *.dylib
+*.test
+*.out
+*.o
+*.a
 
 # Dependencies
 vendor/
 
-# Build output
-/public/
-*.o
-*.a
->>>>>>> 8cf4160762db7d2b24d9fe400bfe933a6b4f26b7
+# Logs
+*.log
+
+# Base de données locale
+*.db
+*.sqlite
+*.sqlite3
