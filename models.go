@@ -1,9 +1,11 @@
 package main
 
-import "gorm.io/gorm"
+import "time"
 
 type Favorite struct {
-	gorm.Model
-	ArtistID   int
-	ArtistName string
+	ID          int       `gorm:"primaryKey"`
+	ArtistID    int       `gorm:"uniqueIndex"`
+	ArtistName  string
+	ArtistImage string
+	CreatedAt   time.Time `gorm:"autoCreateTime"`
 }
