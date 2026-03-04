@@ -1,2 +1,2 @@
-release: ./migrate
-web: ./groupiepersso
+release: ./bin/migrate
+web: ./bin/groupiepersso
