@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strings"
 
 	"groupiepersso/internal/core"
 
@@ -14,23 +15,32 @@ var DB *sql.DB
 
 // InitDB initialise la connexion à la base de données PostgreSQL
 func InitDB() error {
+	log.Println("🔄 InitDB() démarrage...")
+	
 	cfg := core.LoadConfig()
+	log.Printf("📋 cfg.DatabaseURL: %v", cfg.DatabaseURL)
+	
 	if err := cfg.ParseDatabaseURL(); err != nil {
 		return fmt.Errorf("erreur parsing DATABASE_URL: %v", err)
 	}
 
 	connStr := cfg.GetDBConnectionString()
+	log.Printf("🔐 Connection string: %s", maskPassword(connStr))
 
 	var err error
 	DB, err = sql.Open("postgres", connStr)
 	if err != nil {
+		log.Printf("❌ Erreur sql.Open(): %v", err)
 		return fmt.Errorf("erreur lors de l'ouverture de la connexion: %v", err)
 	}
+	log.Println("✅ sql.Open() réussi")
 
 	// Vérification de la connexion
 	if err = DB.Ping(); err != nil {
+		log.Printf("❌ Erreur DB.Ping(): %v", err)
 		return fmt.Errorf("erreur lors du ping de la base de données: %v", err)
 	}
+	log.Println("✅ DB.Ping() réussi")
 
 	log.Println("✅ Connexion à PostgreSQL établie avec succès")
 
@@ -67,7 +77,14 @@ func createTables() error {
 	}
 
 	log.Println("✅ Table 'favorites' créée ou vérifiée avec succès")
+	log.Println("✅ InitDB() complété avec succès")
 	return nil
+}
+
+// maskPassword masque le mot de passe dans une connection string pour la sécurité des logs
+func maskPassword(connStr string) string {
+	// Simple masking: remplace le mot de passe par ****
+	return strings.ReplaceAll(connStr, "password=", "password=****")
 }
 
 // CloseDB ferme la connexion à la base de données

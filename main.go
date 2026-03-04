@@ -49,9 +49,10 @@ func main() {
 
 	// Initialisation de la base de données PostgreSQL pour les favoris
 	if err := database.InitDB(); err != nil {
-		log.Printf("⚠️ Avertissement: Impossible de se connecter à PostgreSQL: %v", err)
+		log.Printf("❌ ERREUR InitDB(): %v", err)
 		log.Println("Le serveur continuera sans fonctionnalités de favoris")
 	} else {
+		log.Println("✅ Base de données initialisée avec succès")
 		defer database.CloseDB()
 	}
 
