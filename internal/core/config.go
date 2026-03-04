@@ -32,8 +32,17 @@ func LoadConfig() *Config {
 	// Charger le fichier .env s'il existe (pour développement local)
 	_ = godotenv.Load()
 
-	// Si DATABASE_URL existe (Scalingo, Heroku), on l'utilise
+	// Priorité aux URLs de base de données fournies par la plateforme
 	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		databaseURL = os.Getenv("SCALINGO_POSTGRESQL_URL")
+	}
+	if databaseURL == "" {
+		databaseURL = os.Getenv("POSTGRESQL_URL")
+	}
+	if databaseURL == "" {
+		databaseURL = os.Getenv("DB_URL")
+	}
 
 	return &Config{
 		Port:              getEnv("PORT", "8080"),
@@ -68,7 +77,7 @@ func getEnv(key, defaultValue string) string {
 func (c *Config) GetDBConnectionString() string {
 	// Si DATABASE_URL est défini (Scalingo), l'utiliser directement
 	if c.DatabaseURL != "" {
-		log.Println("✅ Utilisation de DATABASE_URL pour PostgreSQL")
+		log.Println("✅ Utilisation d'une URL PostgreSQL fournie par l'environnement")
 		return c.DatabaseURL
 	}
 
