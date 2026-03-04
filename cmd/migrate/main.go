@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"groupiepersso/internal/core"
-	"groupiepersso/internal/database"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
