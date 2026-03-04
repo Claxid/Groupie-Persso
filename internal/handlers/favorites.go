@@ -10,10 +10,28 @@ import (
 	"groupiepersso/internal/models"
 )
 
+func ensureDBReady(w http.ResponseWriter) bool {
+	if database.DB != nil {
+		return true
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusServiceUnavailable)
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"error": "Base de données indisponible",
+	})
+	return false
+}
+
 // GetFavorites retourne tous les artistes favoris
 func GetFavorites(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if !ensureDBReady(w) {
 		return
 	}
 
@@ -51,6 +69,10 @@ func AddFavorite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !ensureDBReady(w) {
+		return
+	}
+
 	var fav models.Favorite
 	if err := json.NewDecoder(r.Body).Decode(&fav); err != nil {
 		log.Printf("Erreur lors du décodage JSON: %v", err)
@@ -73,7 +95,7 @@ func AddFavorite(w http.ResponseWriter, r *http.Request) {
 		err = database.DB.QueryRow(`
 			SELECT id, created_at FROM favorites WHERE artist_id = $1
 		`, fav.ArtistID).Scan(&fav.ID, &fav.CreatedAt)
-		
+
 		if err != nil {
 			http.Error(w, "Erreur serveur", http.StatusInternalServerError)
 			return
@@ -90,6 +112,10 @@ func AddFavorite(w http.ResponseWriter, r *http.Request) {
 func RemoveFavorite(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if !ensureDBReady(w) {
 		return
 	}
 
@@ -128,6 +154,10 @@ func RemoveFavorite(w http.ResponseWriter, r *http.Request) {
 func CheckFavorite(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if !ensureDBReady(w) {
 		return
 	}
 

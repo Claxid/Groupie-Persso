@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
+
+	"groupiepersso/internal/core"
 
 	_ "github.com/lib/pq"
 )
@@ -13,35 +14,12 @@ var DB *sql.DB
 
 // InitDB initialise la connexion à la base de données PostgreSQL
 func InitDB() error {
-	// Récupération des variables d'environnement
-	host := os.Getenv("DB_HOST")
-	if host == "" {
-		host = "localhost"
+	cfg := core.LoadConfig()
+	if err := cfg.ParseDatabaseURL(); err != nil {
+		return fmt.Errorf("erreur parsing DATABASE_URL: %v", err)
 	}
 
-	port := os.Getenv("DB_PORT")
-	if port == "" {
-		port = "5432"
-	}
-
-	user := os.Getenv("DB_USER")
-	if user == "" {
-		user = "postgres"
-	}
-
-	password := os.Getenv("DB_PASSWORD")
-	if password == "" {
-		password = "postgres"
-	}
-
-	dbname := os.Getenv("DB_NAME")
-	if dbname == "" {
-		dbname = "groupie_tracker"
-	}
-
-	// Chaîne de connexion PostgreSQL
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+	connStr := cfg.GetDBConnectionString()
 
 	var err error
 	DB, err = sql.Open("postgres", connStr)
@@ -66,6 +44,10 @@ func InitDB() error {
 
 // createTables crée les tables nécessaires si elles n'existent pas
 func createTables() error {
+	if DB == nil {
+		return fmt.Errorf("connexion à la base de données non initialisée")
+	}
+
 	query := `
 	CREATE TABLE IF NOT EXISTS favorites (
 		id SERIAL PRIMARY KEY,
