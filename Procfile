@@ -1,1 +1,2 @@
-web: groupiepersso
+release: ./migrate
+web: ./groupiepersso

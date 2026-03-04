@@ -1,0 +1,27 @@
+{
+  "name": "Groupie Tracker",
+  "description": "Plateforme web interactive pour explorer les artistes musicaux",
+  "buildpacks": [
+    {
+      "url": "https://github.com/Scalingo/go-buildpack.git"
+    }
+  ],
+  "env": {
+    "PORT": {
+      "description": "Port du serveur (défini automatiquement par Scalingo)",
+      "value": "8080"
+    },
+    "ENVIRONMENT": {
+      "description": "Environnement d'exécution",
+      "value": "production"
+    },
+    "GROUPIE_TRACKERS_API": {
+      "description": "URL de l'API Groupie Trackers",
+      "value": "https://groupietrackers.herokuapp.com/api"
+    },
+    "ALLOWED_ORIGINS": {
+      "description": "Origines autorisées pour CORS",
+      "value": "*"
+    }
+  }
+}
