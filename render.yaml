@@ -2,9 +2,9 @@ services:
   - type: web
     name: groupie-tracker
     runtime: go
-    runtimeVersion: 1.21
-    buildCommand: go build -o server .
-    startCommand: ./server
+    runtimeVersion: "1.22"
+    buildCommand: go build -tags netgo -ldflags '-s -w' -o app main.go database.go auth.go routes.go
+    startCommand: ./app
     envVars:
       - key: PORT
         value: 8080

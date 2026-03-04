@@ -1,3 +1,4 @@
+/* Carte Leaflet principale */
 #map {
   height: 70vh;
   min-height: 400px;
@@ -6,18 +7,20 @@
   margin: 16px 0;
 }
 
+/* Zone d'état des opérations de géocodage */
 .geo-status {
   margin-top: 8px;
   font-size: 0.95rem;
   color: #555;
 }
 
-/* Styles pour les popups de la carte */
+/* Styles pour les popups (contenu) de la carte */
 .leaflet-popup-content {
   margin: 12px;
   min-width: 200px;
 }
 
+/* Titre principal du popup (lieu) */
 .popup h3 {
   margin: 0 0 12px 0;
   font-size: 1.1rem;
@@ -26,6 +29,7 @@
   padding-bottom: 6px;
 }
 
+/* Titre secondaire du popup (sections) */
 .popup h4 {
   margin: 12px 0 8px 0;
   font-size: 0.9rem;
@@ -33,24 +37,28 @@
   font-weight: 600;
 }
 
+/* Liste générique sans puces */
 .popup ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
+/* Liste des artistes: colonne avec espacement */
 .popup ul.artists {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
+/* Ligne artiste: avatar + nom */
 .popup ul.artists li {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
+/* Avatar artiste dans le popup */
 .popup ul.artists img {
   width: 50px;
   height: 50px;
@@ -60,12 +68,14 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* Nom d'artiste à côté de l'image */
 .popup ul.artists span {
   font-size: 0.9rem;
   color: #000;
   font-weight: 500;
 }
 
+/* Liste des dates: wraps en lignes */
 .popup ul.dates {
   display: flex;
   flex-wrap: wrap;
@@ -73,6 +83,7 @@
   margin-top: 6px;
 }
 
+/* Puces de date (badge) */
 .popup ul.dates li {
   font-size: 0.8rem;
   color: #000;

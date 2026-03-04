@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -8,18 +9,42 @@ import (
 	"path/filepath"
 	"time"
 
-	"groupie-tracker-localisation.netlify.app/m/internal/database"
-	"groupie-tracker-localisation.netlify.app/m/internal/handlers"
+	"groupiepersso/internal/core"
+	"groupiepersso/internal/database"
+	"groupiepersso/internal/handlers"
 )
 
-func main() {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Fatalf("panic occurred: %v", r)
+// proxyAPI fait un proxy HTTP simple vers une URL cible
+func proxyAPI(targetURL string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Créer une requête GET vers l'API distante
+		resp, err := http.Get(targetURL)
+		if err != nil {
+			http.Error(w, "API unavailable", http.StatusServiceUnavailable)
+			return
 		}
-	}()
+		defer resp.Body.Close()
 
-	// Initialisation de la base de données PostgreSQL
+		// Copier les headers de la réponse API
+		for key, values := range resp.Header {
+			for _, value := range values {
+				w.Header().Add(key, value)
+			}
+		}
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
+
+		// Copier le statut et le body
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+	}
+}
+
+func main() {
+	// Charger la configuration depuis les variables d'environnement
+	cfg := core.LoadConfig()
+
+	// Initialisation de la base de données PostgreSQL pour les favoris
 	if err := database.InitDB(); err != nil {
 		log.Printf("⚠️ Avertissement: Impossible de se connecter à PostgreSQL: %v", err)
 		log.Println("Le serveur continuera sans fonctionnalités de favoris")
@@ -27,76 +52,7 @@ func main() {
 		defer database.CloseDB()
 	}
 
-	// Get port from environment or default to 8080
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	// Proxy handler to avoid CORS issues when the browser requests the external API
-	proxy := func(remote string) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("Proxying request to: %s", remote)
-			client := &http.Client{Timeout: 10 * time.Second}
-			resp, err := client.Get(remote)
-			if err != nil {
-				log.Printf("Error fetching %s: %v", remote, err)
-				http.Error(w, "failed to fetch remote API", http.StatusBadGateway)
-				return
-			}
-			defer resp.Body.Close()
-
-			if ct := resp.Header.Get("Content-Type"); ct != "" {
-				w.Header().Set("Content-Type", ct)
-			} else {
-				w.Header().Set("Content-Type", "application/json")
-			}
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-
-			w.WriteHeader(resp.StatusCode)
-			_, err = io.Copy(w, resp.Body)
-			if err != nil {
-				log.Printf("Error copying response body: %v", err)
-			}
-			log.Printf("Successfully proxied request to: %s", remote)
-		}
-	}
-
-	// Proxies for Groupie Trackers API to avoid CORS in the browser
-	http.HandleFunc("/api/artists-proxy", proxy("https://groupietrackers.herokuapp.com/api/artists"))
-	http.HandleFunc("/api/locations-proxy", proxy("https://groupietrackers.herokuapp.com/api/locations"))
-	http.HandleFunc("/api/dates-proxy", proxy("https://groupietrackers.herokuapp.com/api/dates"))
-	http.HandleFunc("/api/relation-proxy", proxy("https://groupietrackers.herokuapp.com/api/relation"))
-	log.Println("API proxy routes registered")
-
-	// Routes API pour les favoris
-	http.HandleFunc("/api/favorites", func(w http.ResponseWriter, r *http.Request) {
-		// Support des options CORS
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		switch r.Method {
-		case http.MethodGet:
-			handlers.GetFavorites(w, r)
-		case http.MethodPost:
-			handlers.AddFavorite(w, r)
-		case http.MethodDelete:
-			handlers.RemoveFavorite(w, r)
-		default:
-			http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
-		}
-	})
-	
-	http.HandleFunc("/api/favorites/check", handlers.CheckFavorite)
-	log.Println("✅ Routes API favoris enregistrées")
-
-	// Serve static files from a single root: web/static
+	// Route pour les fichiers statiques
 	staticDir := filepath.Join("web", "static")
 	log.Printf("static root: %s", staticDir)
 
@@ -135,21 +91,39 @@ func main() {
 		http.NotFound(w, r)
 	})
 
-	// Serve the root `index.html` (Netlify serves this file at the root)
-	serveIndex := func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, filepath.Join("index.html"))
-	}
+	// Proxy audio pour contourner CORS sur les previews externes
+	http.HandleFunc("/api/audio-proxy", func(w http.ResponseWriter, r *http.Request) {
+		url := r.URL.Query().Get("url")
+		if url == "" {
+			http.Error(w, "missing url", http.StatusBadRequest)
+			return
+		}
+		// Certaines API refusent les requêtes sans User-Agent : forçons-en un.
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		if err != nil {
+			http.Error(w, "invalid url", http.StatusBadRequest)
+			return
+		}
+		req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; GroupieProxy/1.0)")
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			http.Error(w, "upstream error", http.StatusBadGateway)
+			return
+		}
+		defer resp.Body.Close()
 
-	http.HandleFunc("/", serveIndex)
+		// Copier content-type si présent
+		if ct := resp.Header.Get("Content-Type"); ct != "" {
+			w.Header().Set("Content-Type", ct)
+		} else {
+			w.Header().Set("Content-Type", "audio/mpeg")
+		}
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+	})
 
-	// Ensure other app routes return the same index (so local behaviour matches Netlify)
-	routes := []string{"/search", "/filters"}
-	for _, rt := range routes {
-		rlocal := rt
-		http.HandleFunc(rlocal, serveIndex)
-	}
-
-	// Serve specific template HTML files from `web/templates/` when requested
+	// Routes pour les templates
 	http.HandleFunc("/search.html", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "search.html"))
 	})
@@ -162,10 +136,55 @@ func main() {
 		http.ServeFile(w, r, filepath.Join("web", "templates", "favorites.html"))
 	})
 
-	addr := ":" + port
-	log.Printf("Starting server on %s — open http://localhost:%s/", addr, port)
-	// start server
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Fatalf("server failed: %v", err)
-	}
+	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, filepath.Join("web", "templates", "login.html"))
+	})
+
+	// Routes API avec proxy
+	http.HandleFunc("/api/artists-proxy", proxyAPI(fmt.Sprintf("%s/artists", cfg.GroupieTrackerAPI)))
+	http.HandleFunc("/api/locations-proxy", proxyAPI(fmt.Sprintf("%s/locations", cfg.GroupieTrackerAPI)))
+	http.HandleFunc("/api/dates-proxy", proxyAPI(fmt.Sprintf("%s/dates", cfg.GroupieTrackerAPI)))
+	// Alias avec et sans 's' pour éviter les erreurs de route
+	http.HandleFunc("/api/relation-proxy", proxyAPI(fmt.Sprintf("%s/relation", cfg.GroupieTrackerAPI)))
+	http.HandleFunc("/api/relations-proxy", proxyAPI(fmt.Sprintf("%s/relation", cfg.GroupieTrackerAPI)))
+
+	// Routes API pour les favoris
+	http.HandleFunc("/api/favorites", func(w http.ResponseWriter, r *http.Request) {
+		// Support des options CORS
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		switch r.Method {
+		case http.MethodGet:
+			handlers.GetFavorites(w, r)
+		case http.MethodPost:
+			handlers.AddFavorite(w, r)
+		case http.MethodDelete:
+			handlers.RemoveFavorite(w, r)
+		default:
+			http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
+		}
+	})
+
+	http.HandleFunc("/api/favorites/check", handlers.CheckFavorite)
+	log.Println("✅ Routes API favoris enregistrées")
+
+	// Route racine pour index.html
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
+			return
+		}
+		http.ServeFile(w, r, "index.html")
+	})
+
+	port := cfg.Port
+	log.Printf("Starting server on :%s — open http://localhost:%s/", port, port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

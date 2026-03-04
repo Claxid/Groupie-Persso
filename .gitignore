@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Binaires Go
 *.exe
 *.exe~
@@ -15,6 +16,12 @@ go.sum
 
 # Variables d'environnement (contient des données sensibles)
 .env
+=======
+# Environnement
+.env
+.env.local
+.env*.local
+>>>>>>> 8cf4160762db7d2b24d9fe400bfe933a6b4f26b7
 
 # IDE
 .vscode/
@@ -27,6 +34,7 @@ go.sum
 .DS_Store
 Thumbs.db
 
+<<<<<<< HEAD
 # Logs
 *.log
 
@@ -34,3 +42,23 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+=======
+# Go
+dist/
+bin/
+app
+*.exe
+*.exe~
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Dependencies
+vendor/
+
+# Build output
+/public/
+*.o
+*.a
+>>>>>>> 8cf4160762db7d2b24d9fe400bfe933a6b4f26b7
