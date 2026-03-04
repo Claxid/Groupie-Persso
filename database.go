@@ -11,9 +11,20 @@ import (
 var DB *gorm.DB
 
 func InitDatabase() {
+	// Même ordre de détection que internal/core/config.go
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		fmt.Println("⚠️ DATABASE_URL non défini, favoris package main désactivés")
+		dsn = os.Getenv("SCALINGO_POSTGRESQL_URL")
+	}
+	if dsn == "" {
+		dsn = os.Getenv("POSTGRESQL_URL")
+	}
+	if dsn == "" {
+		dsn = os.Getenv("DB_URL")
+	}
+	
+	if dsn == "" {
+		fmt.Println("⚠️ Aucune DATABASE_URL détectée, favoris désactivés")
 		return
 	}
 
