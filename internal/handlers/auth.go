@@ -18,14 +18,27 @@ type user struct {
 
 var DB *sql.DB
 
+func writeCORSHeaders(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+}
+
 func writeJSON(w http.ResponseWriter, status int, payload any) {
+	writeCORSHeaders(w)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(payload)
 }
 
 func HandleRegister(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodOptions {
+		writeCORSHeaders(w)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", "POST, OPTIONS")
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
 		return
 	}
@@ -65,7 +78,13 @@ func HandleRegister(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodOptions {
+		writeCORSHeaders(w)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
 	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", "POST, OPTIONS")
 		writeJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
 		return
 	}
